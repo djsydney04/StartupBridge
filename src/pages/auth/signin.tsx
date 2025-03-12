@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, KeyboardEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -39,16 +39,40 @@ export default function SignIn() {
     setProgress((currentStepIndex / (steps.length - 1)) * 100);
   }, [currentStepIndex]);
   
-  // Handle form submission
-  const handleSubmit = async () => {
-    // Redirect directly to the sign-up page
-    window.location.href = '/auth/signup'; // Using window.location for a full page reload
-  };
+  // Handle key press for navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && steps[currentStepIndex].validateFunc && steps[currentStepIndex].validateFunc()) {
+        goToNextStep();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown as unknown as EventListener);
+    return () => window.removeEventListener('keydown', handleKeyDown as unknown as EventListener);
+  }, [currentStepIndex, email, password]);
   
   // Go to next step
   const goToNextStep = () => {
-    // Redirect directly to the sign-up page
-    window.location.href = '/auth/signup'; // Using window.location for a full page reload
+    const currentStep = steps[currentStepIndex];
+    
+    // Validate current step if required
+    if (currentStep.required && currentStep.validateFunc && !currentStep.validateFunc()) {
+      setError(`Please complete this step before continuing`);
+      return;
+    }
+    
+    setError('');
+    
+    if (currentStepIndex < steps.length - 1) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentStepIndex(currentStepIndex + 1);
+        setIsTransitioning(false);
+      }, 300);
+    } else {
+      // If we're on the last step, handle form submission
+      handleSubmit();
+    }
   };
 
   // Go to previous step
@@ -63,60 +87,57 @@ export default function SignIn() {
     }
   };
   
-  // Styles
-  const gradientTextStyle = {
-    fontSize: '1.8rem',
-    fontWeight: 'bold' as const,
-    background: 'linear-gradient(to right, #ffffff, #e0e0e0)',
-    WebkitBackgroundClip: 'text' as const,
-    WebkitTextFillColor: 'transparent' as const,
-    marginBottom: '1rem',
-    textAlign: 'center' as const
+  // Handle form submission
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      /* Comment for MVP
+      const result = await signIn(email, password);
+      if (result.success) {
+        router.push('/');
+      } else {
+        setError(result.error || 'Invalid email or password');
+      }
+      */
+      
+      // Simulate successful login for now
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  const subtextStyle = {
-    fontSize: '1rem',
-    color: '#d1d5db',
-    marginBottom: '1.5rem',
-    textAlign: 'center' as const
+  // Go to sign-up page
+  const goToSignUp = () => {
+    window.location.href = '/auth/signup'; // Using window.location for a full page reload
   };
   
-  const containerStyle = {
+  // Styling
+  const containerStyle: React.CSSProperties = {
     minHeight: '100vh',
     backgroundColor: '#090618',
     color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     fontFamily: 'system-ui, -apple-system, sans-serif',
-    position: 'relative' as const,
-    overflow: 'hidden' as const
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '20px',
+    justifyContent: 'center',
+    position: 'relative'
   };
   
-  const backgroundStyle = {
-    position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundImage: 'url(/images/background.png)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    zIndex: 0
-  };
-  
-  const overlayStyle = {
-    position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    background: 'linear-gradient(to bottom, rgba(9,6,24,0.4), rgba(9,6,24,0.8))',
-    zIndex: 1
-  };
-  
-  const progressBarContainerStyle = {
-    position: 'fixed' as const,
+  const progressBarContainerStyle: React.CSSProperties = {
+    position: 'fixed',
     top: 0,
     left: 0,
     width: '100%',
@@ -125,86 +146,161 @@ export default function SignIn() {
     zIndex: 10
   };
   
-  const progressBarStyle = {
+  const progressBarStyle: React.CSSProperties = {
     height: '100%',
-    backgroundColor: 'white',
-    transition: 'width 0.5s ease'
+    backgroundColor: '#8B5CF6',
+    transition: 'width 0.3s ease-out'
   };
   
-  const formContainerStyle = {
-    maxWidth: '500px',
+  const formContainerStyle: React.CSSProperties = {
+    maxWidth: '700px',
     width: '100%',
-    padding: '2rem',
-    borderRadius: '0.5rem',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    transition: 'opacity 0.3s ease, transform 0.3s ease',
-    position: 'relative' as const,
-    zIndex: 2
-  };
-  
-  const headerStyle = {
-    marginBottom: '2rem',
-    textAlign: 'center' as const
-  };
-  
-  const titleStyle = {
-    fontSize: '1.8rem',
-    fontWeight: 'bold' as const,
-    marginBottom: '0.5rem',
-    background: 'linear-gradient(to right, #ffffff, #e0e0e0)',
-    WebkitBackgroundClip: 'text' as const,
-    WebkitTextFillColor: 'transparent' as const
-  };
-  
-  const descriptionStyle = {
-    fontSize: '1rem',
-    color: '#d1d5db'
-  };
-  
-  const contentStyle = {
-    marginBottom: '2rem'
-  };
-  
-  const navigationStyle = {
+    margin: '0 auto',
     display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '1.5rem'
+    flexDirection: 'column',
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
+    zIndex: 5
   };
   
-  const buttonStyle = {
-    padding: '0.75rem 2rem',
+  const headerStyle: React.CSSProperties = {
+    marginBottom: '40px',
+    textAlign: 'center'
+  };
+  
+  const titleStyle: React.CSSProperties = {
+    fontSize: '42px',
+    fontWeight: '700',
+    marginBottom: '15px'
+  };
+  
+  const gradientTextStyle = {
+    fontSize: '3rem',
+    fontWeight: 'bold',
+    background: 'linear-gradient(to right, #ffffff, #e0e0e0)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    marginBottom: '1.5rem',
+    textAlign: 'center'
+  } as React.CSSProperties;
+  
+  const descriptionStyle: React.CSSProperties = {
+    fontSize: '18px',
+    color: 'rgba(255, 255, 255, 0.7)'
+  };
+  
+  const subtextStyle: React.CSSProperties = {
+    fontSize: '22px',
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginBottom: '30px'
+  };
+  
+  const contentStyle: React.CSSProperties = {
+    marginBottom: '40px',
+    flex: 1
+  };
+  
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '16px 20px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: 'none',
+    borderBottom: '3px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px 8px 0 0',
+    color: 'white',
+    fontSize: '18px',
+    outline: 'none',
+    transition: 'border-bottom-color 0.2s ease',
+    marginBottom: '20px'
+  };
+  
+  const navigationStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '20px'
+  };
+  
+  const nextButtonStyle: React.CSSProperties = {
+    padding: '12px 24px',
     backgroundColor: 'white',
     color: '#090618',
     border: 'none',
-    borderRadius: '0.5rem',
+    borderRadius: '8px',
     fontWeight: '600',
-    fontSize: '1rem',
+    fontSize: '16px',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+    marginLeft: 'auto',
+    transition: 'transform 0.2s ease, opacity 0.2s ease'
   };
   
-  const errorTextStyle = {
+  const backButtonStyle: React.CSSProperties = {
+    padding: '12px 24px',
+    backgroundColor: 'transparent',
+    color: 'white',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px',
+    fontWeight: '500',
+    fontSize: '16px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  };
+  
+  const createAccountButtonStyle: React.CSSProperties = {
+    padding: '14px 28px',
+    backgroundColor: 'transparent',
+    color: 'white',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px',
+    fontWeight: '500',
+    fontSize: '16px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  };
+  
+  const errorTextStyle: React.CSSProperties = {
     color: '#f87171',
-    fontSize: '0.875rem',
-    marginBottom: '1rem',
-    textAlign: 'center' as const
+    fontSize: '14px',
+    marginBottom: '20px',
+    textAlign: 'center'
   };
-  
-  // Define steps - simplified to one step that redirects to sign-up
+
+  // Define steps - now with separate steps for email and password
   const steps: Step[] = [
     {
-      id: 'redirect',
-      title: 'Join FounderConnect',
-      description: 'Connect with Chapman founders, find co-founders, and access startup resources.',
+      id: 'email',
+      title: 'What\'s your Chapman email?',
+      description: 'We use your email address to identify your account',
       component: (
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={gradientTextStyle}>Welcome to FounderConnect</h2>
-          <p style={subtextStyle}>Create an account to connect with Chapman University entrepreneurs and innovators.</p>
+        <div>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your.name@chapman.edu"
+            style={inputStyle}
+            autoFocus
+          />
         </div>
-      )
+      ),
+      required: true,
+      validateFunc: () => !!email
+    },
+    {
+      id: 'password',
+      title: 'What\'s your password?',
+      component: (
+        <div>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Your Password"
+            style={inputStyle}
+            autoFocus
+          />
+        </div>
+      ),
+      required: true,
+      validateFunc: () => !!password
     }
   ];
 
@@ -223,10 +319,28 @@ export default function SignIn() {
       
       <div style={containerStyle}>
         {/* Background Image */}
-        <div style={backgroundStyle} />
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: 'url(/images/background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          zIndex: 0
+        }} />
         
         {/* Overlay */}
-        <div style={overlayStyle} />
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(to bottom, rgba(9,6,24,0.4), rgba(9,6,24,0.8))',
+          zIndex: 1
+        }} />
         
         {/* Progress bar */}
         <div style={progressBarContainerStyle}>
@@ -258,14 +372,53 @@ export default function SignIn() {
             {currentStep.component}
           </div>
           
-          {/* Navigation button - directs to sign-up */}
+          {/* Navigation buttons */}
           <div style={navigationStyle}>
-            <button 
-              onClick={goToNextStep} 
-              style={buttonStyle}
-            >
-              Create an Account
-            </button>
+            {currentStepIndex > 0 && (
+              <button 
+                onClick={goToPrevStep} 
+                style={backButtonStyle}
+                disabled={isTransitioning}
+              >
+                Back
+              </button>
+            )}
+
+            {currentStepIndex === steps.length - 1 ? (
+              <button 
+                onClick={handleSubmit} 
+                style={nextButtonStyle}
+                disabled={isLoading || !currentStep.validateFunc?.()}
+              >
+                {isLoading ? 'Signing In...' : 'Sign In'}
+              </button>
+            ) : (
+              <button 
+                onClick={goToNextStep} 
+                style={nextButtonStyle}
+                disabled={isTransitioning || !currentStep.validateFunc?.()}
+              >
+                Continue
+              </button>
+            )}
+          </div>
+          
+          {/* Sign up link */}
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <span style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '16px' }}>
+              Don't have an account?{' '}
+              <a 
+                onClick={goToSignUp} 
+                style={{ 
+                  color: 'white', 
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                Sign up
+              </a>
+            </span>
           </div>
         </div>
       </div>

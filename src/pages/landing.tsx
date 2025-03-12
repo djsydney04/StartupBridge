@@ -20,6 +20,7 @@ export default function LandingPage() {
     role: ''
   });
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   // Define the steps for the Typeform-style flow
   const steps: Step[] = [
@@ -65,6 +66,11 @@ export default function LandingPage() {
       type: "final"
     }
   ];
+
+  // Update progress bar based on current step
+  useEffect(() => {
+    setProgress((currentStep / (steps.length - 1)) * 100);
+  }, [currentStep]);
 
   // Handle next step transition
   const goToNextStep = () => {
@@ -121,13 +127,155 @@ export default function LandingPage() {
   };
 
   const handleSignIn = () => {
-    window.location.href = '/auth/signup'; // Using window.location for a full page reload
+    window.location.href = '/auth/signin'; // Changed from signup to signin
   };
 
   // Helper function to check if a field has a value
   const hasValue = (field: string | undefined): boolean => {
     if (!field) return false;
     return Boolean(answers[field as keyof typeof answers]);
+  };
+
+  // Styling
+  const containerStyle: React.CSSProperties = {
+    minHeight: '100vh',
+    backgroundColor: '#090618',
+    color: 'white',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '20px',
+    justifyContent: 'center',
+    position: 'relative'
+  };
+  
+  const progressBarContainerStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '4px',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    zIndex: 10
+  };
+  
+  const progressBarStyle: React.CSSProperties = {
+    height: '100%',
+    backgroundColor: '#8B5CF6',
+    transition: 'width 0.3s ease-out'
+  };
+  
+  const formContainerStyle: React.CSSProperties = {
+    maxWidth: '700px',
+    width: '100%',
+    margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
+    zIndex: 5
+  };
+  
+  const headerStyle: React.CSSProperties = {
+    marginBottom: '40px',
+    textAlign: 'center'
+  };
+  
+  const titleStyle: React.CSSProperties = {
+    fontSize: '42px',
+    fontWeight: '700',
+    marginBottom: '15px'
+  };
+  
+  const introTitleStyle: React.CSSProperties = {
+    fontSize: '48px',
+    fontWeight: '800',
+    marginBottom: '20px',
+    background: 'linear-gradient(to right, #ffffff, #e0e0e0)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent'
+  };
+  
+  const descriptionStyle: React.CSSProperties = {
+    fontSize: '18px',
+    color: 'rgba(255, 255, 255, 0.7)',
+    maxWidth: '600px',
+    margin: '0 auto'
+  };
+  
+  const contentStyle: React.CSSProperties = {
+    marginBottom: '40px',
+    flex: 1
+  };
+  
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '16px 20px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: 'none',
+    borderBottom: '3px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px 8px 0 0',
+    color: 'white',
+    fontSize: '18px',
+    outline: 'none',
+    transition: 'border-bottom-color 0.2s ease',
+    marginBottom: '20px'
+  };
+  
+  const navigationStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '20px'
+  };
+  
+  const nextButtonStyle: React.CSSProperties = {
+    padding: '12px 24px',
+    backgroundColor: 'white',
+    color: '#090618',
+    border: 'none',
+    borderRadius: '8px',
+    fontWeight: '600',
+    fontSize: '16px',
+    cursor: 'pointer',
+    marginLeft: 'auto',
+    transition: 'transform 0.2s ease, opacity 0.2s ease'
+  };
+  
+  const primaryButtonStyle: React.CSSProperties = {
+    padding: '14px 28px',
+    backgroundColor: 'white',
+    color: '#090618',
+    border: 'none',
+    borderRadius: '8px',
+    fontWeight: '600',
+    fontSize: '16px',
+    cursor: 'pointer',
+    transition: 'transform 0.2s ease'
+  };
+  
+  const secondaryButtonStyle: React.CSSProperties = {
+    padding: '14px 28px',
+    backgroundColor: 'transparent',
+    color: 'white',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px',
+    fontWeight: '500',
+    fontSize: '16px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
+  };
+  
+  const optionsContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px'
+  };
+  
+  const optionStyle: React.CSSProperties = {
+    padding: '16px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
   };
 
   return (
@@ -137,14 +285,7 @@ export default function LandingPage() {
         <meta name="description" content="Connect with Chapman University founders, find co-founders, and build your startup." />
       </Head>
       
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: '#090618',
-        color: 'white',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
+      <div style={containerStyle}>
         {/* Background Image */}
         <div style={{
           position: 'fixed',
@@ -169,241 +310,158 @@ export default function LandingPage() {
           zIndex: 1
         }} />
         
-        {/* Progress Bar */}
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: `${(currentStep / (steps.length - 1)) * 100}%`,
-          height: '4px',
-          backgroundColor: 'white',
-          transition: 'width 0.5s ease',
-          zIndex: 10
-        }} />
+        {/* Progress bar */}
+        <div style={progressBarContainerStyle}>
+          <div style={{...progressBarStyle, width: `${progress}%`}}></div>
+        </div>
         
-        {/* Content */}
         <div style={{
-          position: 'relative',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '2rem',
-          zIndex: 2
+          ...formContainerStyle,
+          opacity: isTransitioning ? 0 : 1,
+          transform: isTransitioning ? 'translateY(20px)' : 'translateY(0)'
         }}>
-          <div 
-            style={{
-              maxWidth: '800px',
-              width: '100%',
-              opacity: isTransitioning ? 0 : 1,
-              transform: `translateY(${isTransitioning ? '20px' : '0'})`,
-              transition: 'opacity 0.4s ease, transform 0.4s ease',
-            }}
-          >
-            {/* Question */}
-            <h1 style={{ 
-              fontSize: steps[currentStep].type === 'intro' ? '3.5rem' : '2.5rem', 
-              fontWeight: 'bold',
-              marginBottom: '1rem',
-              background: 'linear-gradient(to right, #ffffff, #e0e0e0)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              display: 'inline-block',
-              textAlign: 'center',
-              width: '100%'
-            }}>
+          {/* Step title and description */}
+          <div style={headerStyle}>
+            <h1 style={steps[currentStep].type === 'intro' ? introTitleStyle : titleStyle}>
               {steps[currentStep].question}
             </h1>
-            
-            {/* Subtext */}
-            <p style={{
-              fontSize: '1.25rem',
-              color: '#d1d5db',
-              marginBottom: '2.5rem',
-              textAlign: 'center',
-              maxWidth: '600px',
-              margin: '0 auto 2.5rem auto'
-            }}>
+            <p style={descriptionStyle}>
               {steps[currentStep].subtext}
             </p>
-            
-            {/* Input based on step type */}
+          </div>
+          
+          {/* Step content */}
+          <div style={contentStyle}>
             {steps[currentStep].type === 'text' && steps[currentStep].field && (
               <input
                 type="text"
                 value={answers[steps[currentStep].field as keyof typeof answers] || ''}
                 onChange={handleInputChange}
                 placeholder="Type your answer here..."
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  fontSize: '1.25rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  border: '2px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '0.5rem',
-                  color: 'white',
-                  marginBottom: '1.5rem',
-                  outline: 'none',
-                  transition: 'border-color 0.3s ease',
-                  fontFamily: 'inherit'
-                }}
+                style={inputStyle}
                 autoFocus
               />
             )}
             
-            {/* Options */}
             {steps[currentStep].type === 'options' && steps[currentStep].options && (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-                width: '100%',
-                marginBottom: '1.5rem',
-                alignItems: 'center',
-                maxWidth: '600px',
-                margin: '0 auto 1.5rem auto'
-              }}>
+              <div style={optionsContainerStyle}>
                 {steps[currentStep].options.map((option, index) => (
-                  <button
+                  <div 
                     key={index}
                     onClick={() => handleOptionSelect(option)}
                     style={{
-                      padding: '1rem',
+                      ...optionStyle,
                       backgroundColor: steps[currentStep].field && 
                         answers[steps[currentStep].field as keyof typeof answers] === option 
-                        ? 'rgba(255, 255, 255, 0.2)' 
-                        : 'rgba(255, 255, 255, 0.1)',
-                      border: '2px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '0.5rem',
-                      color: 'white',
-                      textAlign: 'center',
-                      fontSize: '1rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      fontFamily: 'inherit',
-                      width: '100%'
+                        ? 'rgba(255, 255, 255, 0.1)' 
+                        : 'transparent'
                     }}
                   >
-                    {option}
-                  </button>
+                    <span>{option}</span>
+                  </div>
                 ))}
               </div>
             )}
-            
-            {/* Navigation buttons */}
-            {steps[currentStep].type === 'intro' && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem', gap: '1rem' }}>
-                <button
-                  onClick={goToNextStep}
-                  style={{
-                    padding: '0.75rem 2rem',
-                    backgroundColor: 'white',
-                    color: '#090618',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    fontWeight: '600',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    fontFamily: 'inherit'
-                  }}
-                >
-                  Get Started →
-                </button>
-                
-                <button
-                  onClick={handleSignIn}
-                  style={{
-                    padding: '0.75rem 2rem',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    color: 'white',
-                    borderRadius: '0.5rem',
-                    fontWeight: '600',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    backdropFilter: 'blur(8px)',
-                    fontSize: '1rem',
-                    fontFamily: 'inherit'
-                  }}
-                >
-                  Sign In
-                </button>
-              </div>
-            )}
-            
-            {steps[currentStep].type === 'text' && (
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button
-                  onClick={goToNextStep}
-                  disabled={!hasValue(steps[currentStep].field)}
-                  style={{
-                    padding: '0.75rem 2rem',
-                    backgroundColor: hasValue(steps[currentStep].field) ? 'white' : 'rgba(255, 255, 255, 0.3)',
-                    color: hasValue(steps[currentStep].field) ? '#090618' : 'rgba(255, 255, 255, 0.5)',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    fontWeight: '600',
-                    fontSize: '1rem',
-                    cursor: hasValue(steps[currentStep].field) ? 'pointer' : 'not-allowed',
-                    transition: 'all 0.2s ease',
-                    fontFamily: 'inherit'
-                  }}
-                >
-                  Continue →
-                </button>
-              </div>
-            )}
-            
-            {/* Final step buttons */}
-            {steps[currentStep].type === 'final' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-                <button
-                  onClick={handleGetStarted}
-                  style={{
-                    display: 'inline-block',
-                    padding: '0.75rem 2rem',
-                    backgroundColor: 'white',
-                    color: '#090618',
-                    borderRadius: '0.5rem',
-                    fontWeight: '600',
-                    minWidth: '200px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    fontSize: '1rem',
-                    fontFamily: 'inherit'
-                  }}
-                >
-                  Create Account
-                </button>
-                
-                <button
-                  onClick={handleSignIn}
-                  style={{
-                    display: 'inline-block',
-                    padding: '0.75rem 2rem',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    color: 'white',
-                    borderRadius: '0.5rem',
-                    fontWeight: '600',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    minWidth: '200px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    backdropFilter: 'blur(8px)',
-                    fontSize: '1rem',
-                    fontFamily: 'inherit'
-                  }}
-                >
-                  Sign In
-                </button>
-              </div>
-            )}
           </div>
+          
+          {/* Navigation buttons */}
+          {steps[currentStep].type === 'intro' && (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: '16px', 
+              marginBottom: '20px' 
+            }}>
+              <button
+                onClick={handleGetStarted}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: 'white',
+                  color: '#090618',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: '600',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s ease, opacity 0.2s ease'
+                }}
+              >
+                Get Started →
+              </button>
+              
+              <button
+                onClick={handleSignIn}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: 'transparent',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '8px',
+                  fontWeight: '500',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+              >
+                Sign In
+              </button>
+            </div>
+          )}
+          
+          {steps[currentStep].type === 'text' && (
+            <div style={navigationStyle}>
+              <button
+                onClick={goToNextStep}
+                disabled={!hasValue(steps[currentStep].field)}
+                style={{
+                  ...nextButtonStyle,
+                  opacity: hasValue(steps[currentStep].field) ? 1 : 0.5,
+                  cursor: hasValue(steps[currentStep].field) ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Continue
+              </button>
+            </div>
+          )}
+          
+          {/* Final step buttons */}
+          {steps[currentStep].type === 'final' && (
+            <div style={navigationStyle}>
+              <button
+                onClick={handleSignIn}
+                style={secondaryButtonStyle}
+              >
+                Sign In
+              </button>
+              
+              <button
+                onClick={handleGetStarted}
+                style={primaryButtonStyle}
+              >
+                Create Account
+              </button>
+            </div>
+          )}
+          
+          {/* Sign in link for non-final, non-intro steps */}
+          {steps[currentStep].type !== 'final' && steps[currentStep].type !== 'intro' && (
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <span style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '16px' }}>
+                Already have an account?{' '}
+                <a 
+                  onClick={handleSignIn} 
+                  style={{ 
+                    color: 'white', 
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontWeight: '500'
+                  }}
+                >
+                  Sign in
+                </a>
+              </span>
+            </div>
+          )}
         </div>
         
         {/* Footer */}
