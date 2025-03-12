@@ -1,182 +1,160 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
-import { 
-  CalendarIcon,
-  MapPinIcon,
-  UserGroupIcon,
-  PlusIcon,
-  ChevronRightIcon
-} from '@heroicons/react/24/outline';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon, CalendarIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 
-// Mock events data (replace with real data later)
 const mockEvents = [
   {
     id: 1,
     title: 'Startup Pitch Competition',
-    date: '2024-03-15T18:00:00',
-    location: 'Chapman University - Argyros Forum',
-    description: 'Present your startup idea to a panel of investors and entrepreneurs. Cash prizes for winners!',
-    category: 'Pitch Competition',
-    attendees: 45,
-    maxAttendees: 100,
-    organizer: 'Chapman Entrepreneurship Club',
-    isRSVPed: false
+    organizer: 'Chapman Startup Hub',
+    date: 'March 15, 2024',
+    time: '5:00 PM - 8:00 PM',
+    location: 'Chapman University, Orange, CA',
+    type: 'In-Person',
+    category: 'Competition',
+    description: 'Join us for an exciting evening of startup pitches from Chapman\'s most innovative entrepreneurs. Network with investors and fellow founders.',
+    attendees: 75,
+    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
   },
   {
     id: 2,
-    title: 'Networking Mixer: Tech Founders',
-    date: '2024-03-20T17:30:00',
+    title: 'Founder Fireside Chat',
+    organizer: 'Entrepreneurship Club',
+    date: 'March 20, 2024',
+    time: '6:00 PM - 7:30 PM',
     location: 'Virtual Event',
-    description: 'Connect with fellow tech founders and industry professionals in this virtual networking event.',
+    type: 'Online',
     category: 'Networking',
-    attendees: 28,
-    maxAttendees: 50,
-    organizer: 'Chapman Tech Society',
-    isRSVPed: true
+    description: 'Learn from successful founders as they share their entrepreneurial journey, challenges, and insights in an intimate fireside chat format.',
+    attendees: 120,
+    image: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
   },
-  // Add more mock events...
+  {
+    id: 3,
+    title: 'Startup Workshop Series',
+    organizer: 'Chapman Innovation Lab',
+    date: 'March 25, 2024',
+    time: '4:00 PM - 6:00 PM',
+    location: 'Beckman Hall 404',
+    type: 'Hybrid',
+    category: 'Workshop',
+    description: 'A hands-on workshop series covering essential startup topics including business model validation, fundraising, and growth strategies.',
+    attendees: 45,
+    image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+  },
 ];
 
-const categories = [
-  'All Events',
-  'Networking',
-  'Pitch Competition',
-  'Workshop',
-  'Hackathon',
-  'Speaker Series'
-];
+export default function EventsPage() {
+  return (
+    <ProtectedRoute>
+      <Events />
+    </ProtectedRoute>
+  );
+}
 
-export default function Events() {
-  const [selectedCategory, setSelectedCategory] = useState('All Events');
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZoneName: 'short'
-    }).format(date);
-  };
+function Events() {
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Events & Networking</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Discover and join startup events in the Chapman community
-            </p>
-          </div>
-          <button
-            type="button"
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Create Event
-          </button>
+      <div className="content-container">
+        <div className="content-header">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Startup Events
+          </h1>
+          <p className="mt-2 text-lg text-gray-600">
+            Discover networking opportunities and learning experiences
+          </p>
         </div>
 
-        {/* Category Filters */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`
-                  px-4 py-2 rounded-full text-sm font-medium
-                  ${selectedCategory === category
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }
-                  transition-colors duration-150
-                `}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Events List */}
-        <div className="space-y-6">
-          {mockEvents.map((event) => (
-            <div
-              key={event.id}
-              className="bg-white shadow rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200"
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {event.title}
-                  </h3>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    {event.category}
-                  </span>
+        {/* Search and Filter Section */}
+        <div className="content-section">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
-
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <CalendarIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                      {formatDate(event.date)}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <MapPinIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                      {event.location}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <UserGroupIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                      {event.attendees} / {event.maxAttendees} attending
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600">
-                      {event.description}
-                    </p>
-                    <p className="mt-2 text-sm text-gray-500">
-                      Organized by: {event.organizer}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="relative w-full h-2 bg-gray-200 rounded-full">
-                      <div
-                        className="absolute h-2 bg-purple-500 rounded-full"
-                        style={{
-                          width: `${(event.attendees / event.maxAttendees) * 100}%`
-                        }}
-                      />
-                    </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      {event.maxAttendees - event.attendees} spots remaining
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className={`
-                      ml-4 inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium
-                      ${event.isRSVPed
-                        ? 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
-                        : 'border-transparent text-white bg-purple-600 hover:bg-purple-700'
-                      }
-                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500
-                    `}
-                  >
-                    {event.isRSVPed ? 'Cancel RSVP' : 'RSVP'}
-                  </button>
-                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  placeholder="Search events by title or organizer"
+                />
               </div>
             </div>
-          ))}
+            <button
+              type="button"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            >
+              <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-400 mr-2" />
+              Filters
+            </button>
+          </div>
+        </div>
+
+        {/* Events Grid */}
+        <div className="content-section">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {mockEvents.map((event) => (
+              <div
+                key={event.id}
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="aspect-w-16 aspect-h-9">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {event.title}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {event.organizer}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {event.type}
+                      </span>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <CalendarIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                        <span>{event.date} • {event.time}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <MapPinIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                        <span>{event.location}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <UserGroupIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                        <span>{event.attendees} attending</span>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-sm text-gray-500 line-clamp-2">
+                      {event.description}
+                    </p>
+                  </div>
+                  <div className="mt-6">
+                    <button
+                      type="button"
+                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    >
+                      Register Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </DashboardLayout>
