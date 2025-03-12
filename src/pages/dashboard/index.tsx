@@ -87,22 +87,24 @@ function Dashboard() {
         {/* Quick Actions Grid */}
         <div className="content-section">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="content-grid">
             {quickActions.map((action) => (
               <Link
                 key={action.name}
                 href={action.href}
-                className="flex flex-col items-center p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200 text-center"
+                className="card"
               >
-                <span className={`inline-flex p-3 rounded-lg ${action.color} mb-4`}>
-                  <action.icon className="h-6 w-6 text-white" aria-hidden="true" />
-                </span>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {action.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {action.description}
-                </p>
+                <div className="card-body flex flex-col items-center">
+                  <span className={`inline-flex p-3 rounded-lg ${action.color} mb-4`}>
+                    <action.icon className="h-6 w-6 text-white" aria-hidden="true" />
+                  </span>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {action.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 text-center">
+                    {action.description}
+                  </p>
+                </div>
               </Link>
             ))}
           </div>

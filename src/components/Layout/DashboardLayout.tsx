@@ -31,14 +31,15 @@ const navItems = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // Handle responsive behavior
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-      setIsSidebarOpen(window.innerWidth >= 1024);
+      const isMobileView = window.innerWidth < 1024;
+      setIsMobile(isMobileView);
+      setIsSidebarOpen(!isMobileView);
     };
 
     // Check initial size
@@ -55,28 +56,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="dashboard-layout">
       {/* Mobile header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 lg:hidden">
-        <div className="flex items-center h-16 px-4">
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            aria-label="Toggle sidebar"
-          >
-            {isSidebarOpen ? (
-              <XMarkIcon className="h-6 w-6 text-gray-600" />
-            ) : (
-              <Bars3Icon className="h-6 w-6 text-gray-600" />
-            )}
-          </button>
-          <span className="ml-4 text-lg font-semibold text-purple-600">FounderConnect</span>
+        <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              aria-label="Toggle sidebar"
+            >
+              {isSidebarOpen ? (
+                <XMarkIcon className="h-6 w-6 text-gray-600" />
+              ) : (
+                <Bars3Icon className="h-6 w-6 text-gray-600" />
+              )}
+            </button>
+            <span className="ml-4 text-lg font-semibold text-purple-600">FounderConnect</span>
+          </div>
         </div>
       </div>
 
       {/* Sidebar */}
       <aside 
-        className={`
-          dashboard-sidebar
-          ${isMobile ? (isSidebarOpen ? 'translate-x-0' : '-translate-x-full') : ''}
-        `}
+        className={`dashboard-sidebar ${isMobile && !isSidebarOpen ? '-translate-x-full' : ''}`}
         aria-label="Sidebar"
       >
         {/* Logo */}
@@ -89,7 +89,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Navigation */}
         <nav className="mt-5 px-2 space-y-1" aria-label="Main navigation">
           {navItems.map((item) => {
-            const isActive = router.pathname === item.href;
+            const isActive = router.pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}
@@ -107,12 +107,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 <item.icon
                   className={`
-                    mr-3 h-5 w-5
+                    mr-3 h-5 w-5 flex-shrink-0
                     ${isActive ? 'text-purple-600' : 'text-gray-400 group-hover:text-gray-500'}
                   `}
                   aria-hidden="true"
                 />
-                {item.name}
+                <span>{item.name}</span>
               </Link>
             );
           })}
@@ -129,7 +129,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Mobile sidebar backdrop */}
       {isMobile && isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40"
+          className="fixed inset-0 bg-gray-600 bg-opacity-75 z-30"
           onClick={() => setIsSidebarOpen(false)}
           aria-hidden="true"
         />

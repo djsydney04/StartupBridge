@@ -4,7 +4,6 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { 
   MagnifyingGlassIcon,
   AdjustmentsHorizontalIcon,
-  UserPlusIcon
 } from '@heroicons/react/24/outline';
 
 // Mock data for founders (replace with real data later)
@@ -38,12 +37,6 @@ const mockFounders = [
   },
 ];
 
-const filters = {
-  skills: ['Technical', 'Business', 'Design', 'Marketing'],
-  experience: ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'],
-  interests: ['AI/ML', 'FinTech', 'EdTech', 'E-commerce', 'Healthcare'],
-};
-
 export default function CoFoundersPage() {
   return (
     <ProtectedRoute>
@@ -54,12 +47,6 @@ export default function CoFoundersPage() {
 
 function CoFounders() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState({
-    skills: [],
-    experience: [],
-    interests: [],
-  });
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   return (
     <DashboardLayout>
@@ -85,14 +72,14 @@ function CoFounders() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  className="search-input"
                   placeholder="Search by name, skills, or interests"
                 />
               </div>
             </div>
             <button
               type="button"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              className="btn btn-secondary"
             >
               <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-400 mr-2" />
               Filters
@@ -102,23 +89,23 @@ function CoFounders() {
 
         {/* Co-founders Grid */}
         <div className="content-section">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="content-grid">
             {mockFounders.map((founder) => (
               <div
                 key={founder.id}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+                className="card"
               >
-                <div className="p-6">
+                <div className="card-body">
                   <div className="flex items-center">
-                    <div className="h-16 w-16 rounded-full overflow-hidden">
+                    <div className="h-16 w-16 rounded-full overflow-hidden flex-shrink-0">
                       <img
                         src={founder.imageUrl}
                         alt={founder.name}
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900">
+                    <div className="ml-4 min-w-0">
+                      <h3 className="text-lg font-medium text-gray-900 truncate">
                         {founder.name}
                       </h3>
                       <p className="text-sm text-gray-500">{founder.role}</p>
@@ -154,7 +141,7 @@ function CoFounders() {
                   <div className="mt-6">
                     <button
                       type="button"
-                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                      className="btn btn-primary w-full"
                     >
                       Connect
                     </button>
