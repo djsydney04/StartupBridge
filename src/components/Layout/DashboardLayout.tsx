@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { 
@@ -31,19 +31,41 @@ const navItems = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Handle responsive behavior
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+      setIsSidebarOpen(window.innerWidth >= 1024);
+    };
+
+    // Check initial size
+    checkMobile();
+
+    // Add resize listener
+    window.addEventListener('resize', checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   return (
     <div className="dashboard-layout">
-      {/* Mobile sidebar toggle - moved to header */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 lg:hidden">
+      {/* Mobile header */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 lg:hidden">
         <div className="flex items-center h-16 px-4">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
             aria-label="Toggle sidebar"
           >
-            <Bars3Icon className="h-6 w-6 text-gray-600" />
+            {isSidebarOpen ? (
+              <XMarkIcon className="h-6 w-6 text-gray-600" />
+            ) : (
+              <Bars3Icon className="h-6 w-6 text-gray-600" />
+            )}
           </button>
           <span className="ml-4 text-lg font-semibold text-purple-600">FounderConnect</span>
         </div>
@@ -51,11 +73,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Sidebar */}
       <aside 
-        className={`dashboard-sidebar ${!isSidebarOpen ? '-translate-x-full' : ''}`}
+        className={`
+          dashboard-sidebar
+          ${isMobile ? (isSidebarOpen ? 'translate-x-0' : '-translate-x-full') : ''}
+        `}
         aria-label="Sidebar"
       >
-        {/* Logo - hide on mobile since it's in the header */}
-        <div className="h-16 hidden lg:flex items-center justify-center border-b border-gray-200">
+        {/* Logo */}
+        <div className="h-16 flex items-center justify-center border-b border-gray-200">
           <Link href="/dashboard" className="text-xl font-bold text-purple-600 hover:text-purple-700 transition-colors">
             FounderConnect
           </Link>
@@ -78,6 +103,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   }
                 `}
                 aria-current={isActive ? 'page' : undefined}
+                onClick={() => isMobile && setIsSidebarOpen(false)}
               >
                 <item.icon
                   className={`
@@ -94,16 +120,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="dashboard-content lg:ml-64">
+      <div className="dashboard-content">
         <main className="dashboard-main mt-16 lg:mt-0">
           {children}
         </main>
       </div>
 
       {/* Mobile sidebar backdrop */}
-      {isSidebarOpen && (
+      {isMobile && isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-gray-600 bg-opacity-75 z-30 lg:hidden"
+          className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40"
           onClick={() => setIsSidebarOpen(false)}
           aria-hidden="true"
         />
