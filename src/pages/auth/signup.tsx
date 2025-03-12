@@ -239,6 +239,7 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isClient, setIsClient] = useState(false);
+  const [registrationCompleted, setRegistrationCompleted] = useState(false);
   
   // Set isClient to true once component mounts (client-side only)
   useEffect(() => {
@@ -409,13 +410,15 @@ export default function SignUp() {
       }
       */
       
-      // Simulate success for now
+      // Show registration completed screen for 2 seconds
+      setRegistrationCompleted(true);
+      
+      // Redirect to home page after 2 seconds
       setTimeout(() => {
-        router.push('/home'); // Changed from '/auth/signin?registered=true' to '/home'
-      }, 1000);
+        router.push('/home');
+      }, 2000);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -661,6 +664,84 @@ export default function SignUp() {
     window.addEventListener('keydown', handleKeyDown as unknown as EventListener);
     return () => window.removeEventListener('keydown', handleKeyDown as unknown as EventListener);
   }, [currentStepIndex]);
+
+  // If showing the registration completed screen
+  if (registrationCompleted) {
+    return (
+      <>
+        <Head>
+          <title>Registration Complete - FounderConnect</title>
+        </Head>
+        <div style={containerStyle}>
+          {/* Background Image */}
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'url(/images/background.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            zIndex: 0
+          }} />
+          
+          {/* Overlay */}
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(to bottom, rgba(9,6,24,0.4), rgba(9,6,24,0.8))',
+            zIndex: 1
+          }} />
+          
+          <div style={{
+            maxWidth: '700px',
+            width: '100%',
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 5,
+            textAlign: 'center'
+          }}>
+            <h1 style={{
+              fontSize: '2.5rem',
+              marginBottom: '1.5rem',
+              color: 'white'
+            }}>
+              Registration Complete!
+            </h1>
+            <p style={{
+              fontSize: '1.25rem',
+              marginBottom: '2rem',
+              color: 'rgba(255, 255, 255, 0.8)'
+            }}>
+              Welcome to FounderConnect
+            </p>
+            <div style={{ 
+              width: '60px',
+              height: '60px',
+              border: '5px solid rgba(255,255,255,0.1)',
+              borderTopColor: '#8B5CF6',
+              borderRadius: '50%',
+              display: 'inline-block',
+              animation: 'spin 1s ease-in-out infinite'
+            }}>
+            </div>
+            <style jsx>{`
+              @keyframes spin {
+                to { transform: rotate(360deg) }
+              }
+            `}</style>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   // If not client-side, return a simple loading indicator
   if (!isClient) {
