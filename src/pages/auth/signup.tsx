@@ -411,7 +411,7 @@ export default function SignUp() {
       
       // Simulate success for now
       setTimeout(() => {
-        router.push('/'); // Changed from '/auth/signin?registered=true' to '/' to go directly to main page
+        router.push('/home'); // Changed from '/auth/signin?registered=true' to '/home'
       }, 1000);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
@@ -650,16 +650,17 @@ export default function SignUp() {
 
   // Handle key press for navigation
   useEffect(() => {
-    const handleKeyDown = (e: Event) => {
-      const keyEvent = e as KeyboardEvent;
-      if (keyEvent.key === 'Enter' && steps[currentStepIndex].validateFunc && steps[currentStepIndex].validateFunc()) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && currentStepIndex < steps.length - 1) {
         goToNextStep();
+      } else if (e.key === 'Escape' && currentStepIndex > 0) {
+        goToPrevStep();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentStepIndex, formData]);
+    window.addEventListener('keydown', handleKeyDown as unknown as EventListener);
+    return () => window.removeEventListener('keydown', handleKeyDown as unknown as EventListener);
+  }, [currentStepIndex]);
 
   // If not client-side, return a simple loading indicator
   if (!isClient) {

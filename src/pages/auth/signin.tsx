@@ -98,19 +98,12 @@ export default function SignIn() {
     setError('');
     
     try {
-      /* Comment for MVP
       const result = await signIn(email, password);
       if (result.success) {
-        router.push('/');
+        router.push('/home');
       } else {
         setError(result.error || 'Invalid email or password');
       }
-      */
-      
-      // Simulate successful login for now
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
     } finally {

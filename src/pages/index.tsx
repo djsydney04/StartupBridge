@@ -1,12 +1,22 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { useAuth } from '@/utils/AuthContext'
 
-export default function Home() {
+export default function Index() {
   const router = useRouter()
+  const { user, isLoading } = useAuth()
 
   useEffect(() => {
-    router.replace('/landing')
-  }, [router])
+    if (!isLoading) {
+      if (user) {
+        // If user is authenticated, go to home
+        router.replace('/home')
+      } else {
+        // If not authenticated, go to landing
+        router.replace('/landing')
+      }
+    }
+  }, [isLoading, user, router])
 
   return (
     <div style={{
