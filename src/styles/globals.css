@@ -1,25 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* Base styles */
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  
+  body {
+    @apply bg-gray-50;
+  }
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+/* Custom styles */
+@layer components {
+  .dashboard-layout {
+    @apply min-h-screen bg-gray-50 flex relative;
+  }
+
+  .dashboard-sidebar {
+    @apply fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 
+           transform transition-transform duration-300 ease-in-out 
+           lg:translate-x-0 lg:static lg:inset-0 overflow-y-auto;
+  }
+
+  .dashboard-content {
+    @apply flex-1 min-w-0 flex flex-col transition-all duration-300 ease-in-out;
+  }
+
+  .dashboard-main {
+    @apply flex-1 p-6 overflow-y-auto;
+  }
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* Dark mode */
+/* Dark mode - optional */
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

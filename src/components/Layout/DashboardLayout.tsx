@@ -1,184 +1,113 @@
 'use client';
 
-import { ReactNode, useState, Suspense } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
-import { signOut } from '@/utils/supabase';
+import { useRouter } from 'next/router';
 import { 
-  Home, 
-  Users, 
-  Briefcase, 
-  Calendar, 
-  Book, 
-  User,
-  LogOut
-} from 'react-feather';
+  HomeIcon, 
+  UsersIcon, 
+  BriefcaseIcon, 
+  CalendarIcon, 
+  BookOpenIcon, 
+  ChatBubbleLeftRightIcon, 
+  UserCircleIcon,
+  Bars3Icon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
 
 interface DashboardLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-const menuItems = [
-  { name: 'Dashboard', icon: Home, path: '/dashboard' },
-  { name: 'Co-Founder Matching', icon: Users, path: '/co-founders' },
-  { name: 'Job Board', icon: Briefcase, path: '/jobs' },
-  { name: 'Events', icon: Calendar, path: '/events' },
-  { name: 'Resources', icon: Book, path: '/resources' },
-  { name: 'Profile', icon: User, path: '/profile' },
+const navItems = [
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Find Co-Founders', href: '/co-founders', icon: UsersIcon },
+  { name: 'Job Board', href: '/jobs', icon: BriefcaseIcon },
+  { name: 'Events & Networking', href: '/events', icon: CalendarIcon },
+  { name: 'Resources', href: '/resources', icon: BookOpenIcon },
+  { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
+  { name: 'Profile & Settings', href: '/profile', icon: UserCircleIcon },
 ];
 
-function DashboardLayoutContent({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleLogout = async () => {
-    try {
-      // Perform the sign-out
-      await signOut();
-      // signOut function will handle redirection 
-    } catch (error) {
-      console.error('Error signing out:', error);
-      // Still try to redirect
-      window.location.href = '/auth/signin';
-    }
-  };
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="dashboard-layout">
+      {/* Mobile sidebar toggle - moved to header */}
+      <div className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 lg:hidden">
+        <div className="flex items-center h-16 px-4">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            aria-label="Toggle sidebar"
+          >
+            <Bars3Icon className="h-6 w-6 text-gray-600" />
+          </button>
+          <span className="ml-4 text-lg font-semibold text-purple-600">FounderConnect</span>
+        </div>
+      </div>
+
       {/* Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-white shadow-lg">
-        <div className="p-4">
-          <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
+      <aside 
+        className={`dashboard-sidebar ${!isSidebarOpen ? '-translate-x-full' : ''}`}
+        aria-label="Sidebar"
+      >
+        {/* Logo - hide on mobile since it's in the header */}
+        <div className="h-16 hidden lg:flex items-center justify-center border-b border-gray-200">
+          <Link href="/dashboard" className="text-xl font-bold text-purple-600 hover:text-purple-700 transition-colors">
             FounderConnect
           </Link>
         </div>
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.path;
-              return (
-                <li key={item.name}>
-                  <Link
-                    href={item.path}
-                    className={`flex items-center p-3 rounded-lg hover:bg-blue-50 transition-colors ${
-                      isActive ? 'bg-blue-100 text-blue-600' : 'text-gray-700'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 mr-3" />
-                    {item.name}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+
+        {/* Navigation */}
+        <nav className="mt-5 px-2 space-y-1" aria-label="Main navigation">
+          {navItems.map((item) => {
+            const isActive = router.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`
+                  group flex items-center px-4 py-3 text-sm font-medium rounded-md
+                  transition-colors duration-150 ease-in-out
+                  ${isActive 
+                    ? 'bg-purple-50 text-purple-600' 
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }
+                `}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <item.icon
+                  className={`
+                    mr-3 h-5 w-5
+                    ${isActive ? 'text-purple-600' : 'text-gray-400 group-hover:text-gray-500'}
+                  `}
+                  aria-hidden="true"
+                />
+                {item.name}
+              </Link>
+            );
+          })}
         </nav>
-        <div className="p-4 border-t">
-          <button
-            className="flex items-center w-full p-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5 mr-3" />
-            Logout
-          </button>
-        </div>
       </aside>
 
-      {/* Mobile menu button */}
-      <div className="md:hidden fixed top-4 left-4 z-20">
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 bg-white rounded-lg shadow-lg"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            {isMobileMenuOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
-        </button>
+      {/* Main Content */}
+      <div className="dashboard-content lg:ml-64">
+        <main className="dashboard-main mt-16 lg:mt-0">
+          {children}
+        </main>
       </div>
 
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-10 bg-gray-800 bg-opacity-50">
-          <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
-            <div className="p-4">
-              <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
-                FounderConnect
-              </Link>
-            </div>
-            <nav className="p-4">
-              <ul className="space-y-2">
-                {menuItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = pathname === item.path;
-                  return (
-                    <li key={item.name}>
-                      <Link
-                        href={item.path}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center p-3 rounded-lg hover:bg-blue-50 transition-colors ${
-                          isActive ? 'bg-blue-100 text-blue-600' : 'text-gray-700'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5 mr-3" />
-                        {item.name}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-            <div className="p-4 border-t">
-              <button
-                className="flex items-center w-full p-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
-                onClick={handleLogout}
-              >
-                <LogOut className="w-5 h-5 mr-3" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Mobile sidebar backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-600 bg-opacity-75 z-30 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
       )}
-
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto p-8">
-        {children}
-      </main>
     </div>
-  );
-}
-
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-800">Loading...</h2>
-        </div>
-      </div>
-    }>
-      <DashboardLayoutContent children={children} />
-    </Suspense>
   );
 } 
