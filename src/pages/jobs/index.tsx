@@ -66,11 +66,6 @@ export default function JobsPage() {
 
 function Jobs() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState({
-    type: [],
-    location: [],
-    compensation: [],
-  });
 
   return (
     <DashboardLayout>
@@ -96,14 +91,14 @@ function Jobs() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  className="search-input"
                   placeholder="Search jobs by title, company, or skills"
                 />
               </div>
             </div>
             <button
               type="button"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              className="btn btn-secondary"
             >
               <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-400 mr-2" />
               Filters
@@ -117,9 +112,9 @@ function Jobs() {
             {mockJobs.map((job) => (
               <div
                 key={job.id}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+                className="card"
               >
-                <div className="p-6">
+                <div className="card-body">
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
                       <img
@@ -178,7 +173,7 @@ function Jobs() {
                       <div className="mt-4">
                         <button
                           type="button"
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                          className="btn btn-primary"
                         >
                           Apply Now
                         </button>

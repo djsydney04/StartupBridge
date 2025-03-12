@@ -80,14 +80,14 @@ function Events() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  className="search-input"
                   placeholder="Search events by title or organizer"
                 />
               </div>
             </div>
             <button
               type="button"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              className="btn btn-secondary"
             >
               <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-400 mr-2" />
               Filters
@@ -97,11 +97,11 @@ function Events() {
 
         {/* Events Grid */}
         <div className="content-section">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="content-grid">
             {mockEvents.map((event) => (
               <div
                 key={event.id}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+                className="card"
               >
                 <div className="aspect-w-16 aspect-h-9">
                   <img
@@ -110,7 +110,7 @@ function Events() {
                     className="w-full h-48 object-cover"
                   />
                 </div>
-                <div className="p-6">
+                <div className="card-body">
                   <div>
                     <div className="flex justify-between items-start">
                       <div>
@@ -146,7 +146,7 @@ function Events() {
                   <div className="mt-6">
                     <button
                       type="button"
-                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                      className="btn btn-primary w-full"
                     >
                       Register Now
                     </button>
