@@ -11,7 +11,7 @@
   }
   
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-50 text-gray-900 overflow-x-hidden;
   }
 }
 
@@ -30,11 +30,11 @@
 
   .dashboard-content {
     @apply flex-1 flex flex-col transition-all duration-300 ease-in-out
-           absolute top-0 right-0 left-0 lg:left-64 pt-16 lg:pt-0;
+           absolute top-0 right-0 left-0 lg:left-64 pt-16 lg:pt-0 overflow-y-auto h-screen;
   }
 
   .dashboard-main {
-    @apply flex-1 py-6 px-4 sm:px-6 lg:px-8 overflow-y-auto;
+    @apply flex-1 py-4 px-2 sm:px-4 lg:px-6;
   }
 
   /* Content containers */
@@ -43,17 +43,17 @@
   }
 
   .content-section {
-    @apply bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 w-full
+    @apply bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-5 w-full
            transition-all duration-300 ease-in-out;
   }
 
   .content-header {
-    @apply w-full text-center mb-6;
+    @apply w-full text-center mb-4;
   }
 
   /* Grid layouts */
   .content-grid {
-    @apply grid gap-4 sm:gap-6 w-full 
+    @apply grid gap-3 sm:gap-4 w-full 
            grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
   }
 
@@ -64,7 +64,7 @@
   }
 
   .card-body {
-    @apply p-4 sm:p-6;
+    @apply p-3 sm:p-4;
   }
 
   /* Button styles */

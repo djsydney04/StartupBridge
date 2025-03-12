@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar - fixed on desktop */}
       <aside 
         className={`dashboard-sidebar ${isMobile && !isSidebarOpen ? '-translate-x-full' : ''}`}
         aria-label="Sidebar"
@@ -119,7 +119,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content - scrollable */}
       <div className="dashboard-content">
         <main className="dashboard-main">
           {children}
