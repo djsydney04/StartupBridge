@@ -121,10 +121,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Content */}
       <div className="dashboard-content">
-        <main className="dashboard-main mt-16 lg:mt-0">
-          <div className="flex justify-center w-full">
-            {children}
-          </div>
+        <main className="dashboard-main">
+          {children}
         </main>
       </div>
 
