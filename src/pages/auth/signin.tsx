@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
 import { useAuth } from '@/utils/AuthContext';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Step interface for Typeform-like experience
 interface Step {
@@ -14,7 +15,15 @@ interface Step {
   validateFunc?: () => boolean;
 }
 
-export default function SignIn() {
+export default function SignInPage() {
+  return (
+    <ProtectedRoute requireAuth={false}>
+      <SignIn />
+    </ProtectedRoute>
+  );
+}
+
+function SignIn() {
   const router = useRouter();
   const { signIn } = useAuth();
   
@@ -100,7 +109,7 @@ export default function SignIn() {
     try {
       const result = await signIn(email, password);
       if (result.success) {
-        router.push('/home');
+        router.push('/dashboard');
       } else {
         setError(result.error || 'Invalid email or password');
       }

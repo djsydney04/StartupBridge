@@ -413,9 +413,9 @@ export default function SignUp() {
       // Show registration completed screen for 2 seconds
       setRegistrationCompleted(true);
       
-      // Redirect to home page after 2 seconds
+      // Redirect to dashboard page after 2 seconds
       setTimeout(() => {
-        router.push('/home');
+        router.push('/dashboard');
       }, 2000);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
