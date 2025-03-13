@@ -15,7 +15,8 @@ export default function ProtectedRoute({ children, requireAuth = true }: Protect
     if (!isLoading) {
       if (requireAuth && !user) {
         // User is not authenticated but trying to access a protected route
-        router.push('/auth/signin');
+        // Redirect to the landing page instead of directly to signin
+        router.push('/');
       } else if (!requireAuth && user) {
         // User is authenticated but trying to access an auth page
         router.push('/dashboard');
