@@ -15,8 +15,8 @@ export default function Navigation() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="hover:opacity-90 transition-opacity">
             <Image 
-              src="/images/FounderConnectLogo.svg" 
-              alt="FounderConnect Logo" 
+              src="/images/Logo.svg" 
+              alt="Logo" 
               width={150} 
               height={35}
               priority

@@ -81,8 +81,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
             <Link href="/dashboard" className="hover:opacity-90 transition-opacity ml-2">
               <Image 
-                src="/images/FounderConnectLogo.svg" 
-                alt="FounderConnect Logo" 
+                src="/images/Logo.svg" 
+                alt="Logo" 
                 width={120} 
                 height={30}
                 priority
@@ -101,8 +101,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="h-16 flex items-center justify-center border-b border-gray-200 p-2">
           <Link href="/dashboard" className="hover:opacity-90 transition-opacity">
             <Image 
-              src="/images/FounderConnectLogo.svg" 
-              alt="FounderConnect Logo" 
+              src="/images/Logo.svg" 
+              alt="Logo" 
               width={180} 
               height={40}
               priority
