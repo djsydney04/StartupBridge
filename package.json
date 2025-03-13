@@ -23,6 +23,7 @@
     "eslint": "^8.0.0",
     "eslint-config-next": "^13.0.0",
     "framer-motion": "^12.4.10",
+    "identicon.js": "^2.3.3",
     "next": "^15.2.2",
     "postcss": "^8.0.0",
     "react": "^19.0.0",

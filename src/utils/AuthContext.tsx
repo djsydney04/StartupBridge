@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/router';
-import { supabase, signIn, signOut, isAuthenticated, getProfile, getAuthUser, User, Profile } from './supabase';
+import { supabase, signIn, signOut, isAuthenticated, getProfile, getAuthUser, updateProfile, User, Profile } from './supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -10,6 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: any }>;
   signOut: () => Promise<{ success: boolean; error?: any }>;
+  updateProfile: (profileData: Partial<Profile>) => Promise<{ success: boolean; profile?: Profile; error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -135,12 +136,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  const handleUpdateProfile = async (profileData: Partial<Profile>) => {
+    try {
+      if (!user?.id) {
+        return { success: false, error: 'User not authenticated' };
+      }
+      
+      const result = await updateProfile(user.id, profileData);
+      
+      if (result.success && result.profile) {
+        setProfile(result.profile);
+      }
+      
+      return result;
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      return { success: false, error: error.message };
+    }
+  };
+  
   const value = {
     user,
     profile,
     isLoading,
     signIn: handleSignIn,
     signOut: handleSignOut,
+    updateProfile: handleUpdateProfile,
   };
   
   return (
