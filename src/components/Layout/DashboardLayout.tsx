@@ -111,9 +111,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-5 px-2 space-y-1 flex flex-col h-[calc(100%-4rem)]" aria-label="Main navigation">
+        <nav className="mt-5 px-2 flex flex-col h-[calc(100%-4rem)] justify-between" aria-label="Main navigation">
           {/* Main menu items */}
-          <div className="flex-grow">
+          <div className="space-y-1">
             {navItems.map((item) => {
               const isActive = router.pathname.startsWith(item.href);
               return (
@@ -145,7 +145,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Profile & Settings at bottom */}
-          <div className="mt-auto border-t border-gray-200 pt-2">
+          <div className="border-t border-gray-200 pt-2 pb-6">
             <Link
               href="/profile"
               className={`
