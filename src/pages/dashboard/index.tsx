@@ -22,28 +22,28 @@ const quickActions = [
     description: 'Connect with potential startup partners',
     href: '/co-founders',
     icon: UsersIcon,
-    color: 'bg-purple-500'
+    color: 'bg-black'
   },
   {
     name: 'Explore Startup Jobs',
     description: 'Browse available positions',
     href: '/jobs',
     icon: BriefcaseIcon,
-    color: 'bg-blue-500'
+    color: 'bg-black'
   },
   {
     name: 'Upcoming Events',
     description: 'See what\'s happening in the community',
     href: '/events',
     icon: CalendarIcon,
-    color: 'bg-green-500'
+    color: 'bg-black'
   },
   {
     name: 'Resources Library',
     description: 'Access guides, templates and tools',
     href: '/resources',
     icon: BookOpenIcon,
-    color: 'bg-orange-500'
+    color: 'bg-black'
   }
 ];
 
@@ -56,7 +56,7 @@ const recentActivity = [
     description: 'Sarah Chen wants to connect with you',
     time: '2 hours ago',
     icon: UsersIcon,
-    color: 'text-purple-500'
+    color: 'text-gray-800'
   },
   {
     id: 2,
@@ -65,7 +65,7 @@ const recentActivity = [
     description: 'Frontend Developer at TechStartup',
     time: '3 hours ago',
     icon: BriefcaseIcon,
-    color: 'text-blue-500'
+    color: 'text-gray-800'
   },
   {
     id: 3,
@@ -74,7 +74,7 @@ const recentActivity = [
     description: 'Startup Pitch Competition this Friday',
     time: '1 day ago',
     icon: CalendarIcon,
-    color: 'text-green-500'
+    color: 'text-gray-800'
   }
 ];
 
@@ -217,7 +217,7 @@ function Dashboard() {
           <div className="content-section">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
-              <Link href="/profile" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+              <Link href="/profile" className="text-sm text-gray-600 hover:text-black flex items-center">
                 View All <ArrowRightIcon className="ml-1 h-3 w-3" />
               </Link>
             </div>
@@ -253,7 +253,7 @@ function Dashboard() {
           <div className="content-section">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-semibold text-gray-900">Featured Resources</h2>
-              <Link href="/resources" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+              <Link href="/resources" className="text-sm text-gray-600 hover:text-black flex items-center">
                 View All <ArrowRightIcon className="ml-1 h-3 w-3" />
               </Link>
             </div>
@@ -261,12 +261,12 @@ function Dashboard() {
               {featuredResources.map((resource) => (
                 <div key={resource.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
                   <div className="flex items-start">
-                    <span className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-purple-100 text-purple-600 mr-3">
+                    <span className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-gray-100 text-gray-800 mr-3">
                       <resource.icon className="h-4 w-4" />
                     </span>
                     <div>
                       <div className="flex items-center mb-1">
-                        <span className="text-xs font-medium text-purple-600 bg-purple-50 py-0.5 px-2 rounded">
+                        <span className="text-xs font-medium text-gray-800 bg-gray-100 py-0.5 px-2 rounded">
                           {resource.type}
                         </span>
                         <span className="text-xs text-gray-500 ml-2">
@@ -293,7 +293,7 @@ function Dashboard() {
           <div className="content-section">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-semibold text-gray-900">Upcoming Events</h2>
-              <Link href="/events" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+              <Link href="/events" className="text-sm text-gray-600 hover:text-black flex items-center">
                 View All <ArrowRightIcon className="ml-1 h-3 w-3" />
               </Link>
             </div>
@@ -317,7 +317,7 @@ function Dashboard() {
           <div className="content-section">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-semibold text-gray-900">Job Highlights</h2>
-              <Link href="/jobs" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+              <Link href="/jobs" className="text-sm text-gray-600 hover:text-black flex items-center">
                 View All <ArrowRightIcon className="ml-1 h-3 w-3" />
               </Link>
             </div>
@@ -340,7 +340,7 @@ function Dashboard() {
           <div className="content-section">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-semibold text-gray-900">Co-founder Matches</h2>
-              <Link href="/co-founders" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+              <Link href="/co-founders" className="text-sm text-gray-600 hover:text-black flex items-center">
                 View All <ArrowRightIcon className="ml-1 h-3 w-3" />
               </Link>
             </div>
@@ -349,7 +349,7 @@ function Dashboard() {
                 <div key={person.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-medium text-gray-900">{person.name}</h3>
-                    <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
+                    <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">
                       {person.matchScore}% Match
                     </span>
                   </div>
