@@ -1,17 +1,41 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import EventCard from '@/components/EventCard';
 import { 
   MagnifyingGlassIcon, 
-  AdjustmentsHorizontalIcon, 
   CalendarIcon, 
   MapPinIcon, 
   UserGroupIcon,
-  ChevronDownIcon,
   BuildingLibraryIcon,
-  UserGroupIcon as UserGroupSolidIcon,
-  GlobeAltIcon
+  GlobeAltIcon,
+  RocketLaunchIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
+
+// Organization filters
+const organizationFilters = [
+  {
+    id: 'all',
+    name: 'All Organizations',
+    icon: BuildingLibraryIcon,
+  },
+  {
+    id: 'leatherby',
+    name: 'Leatherby Center',
+    icon: RocketLaunchIcon,
+  },
+  {
+    id: 'ceo',
+    name: 'CEO',
+    icon: UserGroupIcon,
+  },
+  {
+    id: 'community',
+    name: 'Community',
+    icon: GlobeAltIcon,
+  }
+];
 
 // Event type definition
 interface Event {
@@ -26,6 +50,8 @@ interface Event {
   description: string;
   attendees: number;
   image: string;
+  isVirtual?: boolean;
+  registrationLink?: string;
 }
 
 // Category type
@@ -126,6 +152,20 @@ const allEvents = [
   ...mockEvents.community
 ];
 
+// Get upcoming events (next 7 days)
+const getUpcomingEvents = () => {
+  const today = new Date();
+  const sevenDaysFromNow = new Date();
+  sevenDaysFromNow.setDate(today.getDate() + 7);
+
+  return allEvents
+    .filter(event => {
+      const eventDate = new Date(event.date);
+      return eventDate >= today && eventDate <= sevenDaysFromNow;
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+};
+
 export default function EventsPage() {
   return (
     <ProtectedRoute>
@@ -136,253 +176,142 @@ export default function EventsPage() {
 
 function Events() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<CategoryKey | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Record<CategoryKey, boolean>>({
-    ceo: true,
-    leatherby: true,
-    community: true
+  const [selectedOrg, setSelectedOrg] = useState('all');
+  const [view, setView] = useState<'grid' | 'calendar'>('grid');
+  
+  const upcomingEvents = getUpcomingEvents();
+
+  // Filter events based on search and organization
+  const filteredEvents = allEvents.filter(event => {
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesOrg = selectedOrg === 'all' || 
+                      (selectedOrg === 'leatherby' && event.organizer.includes('Leatherby')) ||
+                      (selectedOrg === 'ceo' && event.organizer.includes('CEO')) ||
+                      (selectedOrg === 'community' && event.organizer.includes('Community'));
+    return matchesSearch && matchesOrg;
   });
-
-  // Filter events based on search query
-  const filteredEvents = searchQuery 
-    ? allEvents.filter(event => {
-        const query = searchQuery.toLowerCase();
-        return (
-          event.title.toLowerCase().includes(query) ||
-          event.organizer.toLowerCase().includes(query) ||
-          event.description.toLowerCase().includes(query) ||
-          event.category.toLowerCase().includes(query)
-        );
-      })
-    : null;
-
-  // Toggle category expansion
-  const toggleCategory = (category: CategoryKey) => {
-    setExpandedCategories({
-      ...expandedCategories,
-      [category]: !expandedCategories[category]
-    });
-  };
 
   return (
     <DashboardLayout>
-      <div className="content-container max-w-6xl mx-auto">
-        <div className="content-header mt-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Events
-          </h1>
+      <div>
+        {/* Header */}
+        <div className="content-header">
+          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
           <p className="mt-2 text-lg text-gray-600">
-            Discover networking opportunities and learning experiences
+            Discover and join events in the Chapman startup community
           </p>
         </div>
 
-        {/* Search and Filter Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mt-6 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-gray-200 focus:border-gray-400 transition-all duration-200 text-sm"
-                  placeholder="Search events by title, organizer, or category"
-                />
-              </div>
+        {/* Upcoming Events Section */}
+        {upcomingEvents.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Upcoming This Week</h2>
+              <button className="text-sm text-gray-600 hover:text-gray-900 flex items-center">
+                View all <ChevronRightIcon className="h-4 w-4 ml-1" />
+              </button>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.slice(0, 3).map((event) => (
+                <EventCard
+                  key={`upcoming-${event.id}`}
+                  id={event.id}
+                  title={event.title}
+                  date={event.date}
+                  time={event.time}
+                  location={event.location}
+                  description={event.description}
+                  attendees={event.attendees}
+                  isVirtual={event.type === 'Online'}
+                  organizer={event.organizer}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Organization Filters */}
+        <div className="mt-8 flex space-x-4 overflow-x-auto pb-4">
+          {organizationFilters.map((org) => (
             <button
-              type="button"
-              className="inline-flex items-center px-3 py-2.5 border rounded-lg text-sm font-medium transition-all duration-200 bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              key={org.id}
+              onClick={() => setSelectedOrg(org.id)}
+              className={`flex items-center px-4 py-2 rounded-lg border whitespace-nowrap transition-all ${
+                selectedOrg === org.id
+                  ? 'border-black bg-black text-white'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+              }`}
             >
-              <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-400 mr-2" />
-              Filters
+              <org.icon className={`h-5 w-5 mr-2 ${
+                selectedOrg === org.id ? 'text-white' : 'text-gray-500'
+              }`} />
+              <span className="text-sm font-medium">{org.name}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Search and View Toggle */}
+        <div className="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+          <div className="relative flex-1 max-w-lg">
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            />
+            <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          </div>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setView('grid')}
+              className={`px-4 py-2 rounded-lg ${
+                view === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Grid View
+            </button>
+            <button
+              onClick={() => setView('calendar')}
+              className={`px-4 py-2 rounded-lg ${
+                view === 'calendar' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Calendar View
             </button>
           </div>
         </div>
 
-        {/* Search Results (if any) */}
-        {filteredEvents && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Search Results ({filteredEvents.length})
-            </h2>
-            
-            {filteredEvents.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredEvents.map((event) => (
-                  <EventCard key={`search-${event.id}`} event={event} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No events found matching your search.</p>
-                <button 
-                  onClick={() => setSearchQuery('')}
-                  className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800"
-                >
-                  Clear Search
-                </button>
-              </div>
-            )}
+        {/* Events Grid */}
+        {view === 'grid' && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((event) => (
+              <EventCard
+                key={event.id}
+                id={event.id}
+                title={event.title}
+                date={event.date}
+                time={event.time}
+                location={event.location}
+                description={event.description}
+                attendees={event.attendees}
+                isVirtual={event.type === 'Online'}
+                organizer={event.organizer}
+              />
+            ))}
           </div>
         )}
 
-        {/* Events by Category */}
-        {!searchQuery && (
-          <>
-            {/* CEO Events */}
-            <div className="mb-6">
-              <div 
-                className="flex items-center justify-between p-4 bg-white rounded-t-xl shadow-sm border border-gray-100 cursor-pointer"
-                onClick={() => toggleCategory('ceo')}
-              >
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                    <UserGroupSolidIcon className="h-6 w-6 text-gray-700" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">CEO Events</h2>
-                    <p className="text-sm text-gray-500">Chapman Entrepreneurs Organization</p>
-                  </div>
-                </div>
-                <ChevronDownIcon 
-                  className={`h-6 w-6 text-gray-400 transition-transform ${expandedCategories.ceo ? 'transform rotate-180' : ''}`} 
-                />
-              </div>
-              
-              {expandedCategories.ceo && (
-                <div className="bg-white rounded-b-xl shadow-sm border-x border-b border-gray-100 p-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {mockEvents.ceo.map((event) => (
-                      <EventCard key={`ceo-${event.id}`} event={event} />
-                    ))}
-                  </div>
-                </div>
-              )}
+        {/* Calendar View */}
+        {view === 'calendar' && (
+          <div className="mt-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <p className="text-center text-gray-500">Calendar view coming soon...</p>
             </div>
-            
-            {/* Leatherby Center Events */}
-            <div className="mb-6">
-              <div 
-                className="flex items-center justify-between p-4 bg-white rounded-t-xl shadow-sm border border-gray-100 cursor-pointer"
-                onClick={() => toggleCategory('leatherby')}
-              >
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                    <BuildingLibraryIcon className="h-6 w-6 text-gray-700" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">Leatherby Center Events</h2>
-                    <p className="text-sm text-gray-500">Entrepreneurship workshops and competitions</p>
-                  </div>
-                </div>
-                <ChevronDownIcon 
-                  className={`h-6 w-6 text-gray-400 transition-transform ${expandedCategories.leatherby ? 'transform rotate-180' : ''}`} 
-                />
-              </div>
-              
-              {expandedCategories.leatherby && (
-                <div className="bg-white rounded-b-xl shadow-sm border-x border-b border-gray-100 p-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {mockEvents.leatherby.map((event) => (
-                      <EventCard key={`leatherby-${event.id}`} event={event} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Community Events */}
-            <div className="mb-6">
-              <div 
-                className="flex items-center justify-between p-4 bg-white rounded-t-xl shadow-sm border border-gray-100 cursor-pointer"
-                onClick={() => toggleCategory('community')}
-              >
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                    <GlobeAltIcon className="h-6 w-6 text-gray-700" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">Community Events</h2>
-                    <p className="text-sm text-gray-500">External opportunities from the startup ecosystem</p>
-                  </div>
-                </div>
-                <ChevronDownIcon 
-                  className={`h-6 w-6 text-gray-400 transition-transform ${expandedCategories.community ? 'transform rotate-180' : ''}`} 
-                />
-              </div>
-              
-              {expandedCategories.community && (
-                <div className="bg-white rounded-b-xl shadow-sm border-x border-b border-gray-100 p-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {mockEvents.community.map((event) => (
-                      <EventCard key={`community-${event.id}`} event={event} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
+          </div>
         )}
       </div>
     </DashboardLayout>
   );
 }
-
-// Extracted Event Card Component
-function EventCard({ event }: { event: Event }) {
-  return (
-    <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200 h-[420px] flex flex-col">
-      <div className="aspect-w-16 aspect-h-9">
-        <img
-          src={event.image}
-          alt={event.title}
-          className="w-full h-48 object-cover"
-        />
-      </div>
-      <div className="p-4 flex flex-col flex-grow">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-base font-medium text-gray-900 line-clamp-2">
-              {event.title}
-            </h3>
-            <p className="text-sm text-gray-500">
-              {event.organizer}
-            </p>
-          </div>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-            {event.type}
-          </span>
-        </div>
-        <div className="mt-3 space-y-2 text-sm">
-          <div className="flex items-center text-gray-500">
-            <CalendarIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-            <span>{event.date} • {event.time}</span>
-          </div>
-          <div className="flex items-center text-gray-500">
-            <MapPinIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-            <span className="truncate">{event.location}</span>
-          </div>
-          <div className="flex items-center text-gray-500">
-            <UserGroupIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-            <span>{event.attendees} attending</span>
-          </div>
-        </div>
-        <p className="mt-3 text-sm text-gray-500 line-clamp-3 flex-grow">
-          {event.description}
-        </p>
-        <div className="mt-4">
-          <button
-            type="button"
-            className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-black hover:bg-gray-800 shadow-sm transition-colors"
-          >
-            Register Now
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-} 

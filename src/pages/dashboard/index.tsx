@@ -211,6 +211,88 @@ function Dashboard() {
           </div>
         </div>
 
+        {/* Co-founder Matches */}
+        <div className="content-section">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-semibold text-gray-900">Co-founder Matches</h2>
+            <Link href="/co-founders" className="text-sm text-gray-600 hover:text-black flex items-center">
+              View All <ArrowRightIcon className="ml-1 h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {suggestedCoFounders.map((person) => (
+              <div key={person.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-900">{person.name}</h3>
+                  <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">
+                    {person.matchScore}% Match
+                  </span>
+                </div>
+                <div className="mt-1 text-xs text-gray-500">
+                  {person.role}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {person.skills.map((skill, idx) => (
+                    <span key={idx} className="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Two-column layout for Events and Jobs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Upcoming Events */}
+          <div className="content-section">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-semibold text-gray-900">Upcoming Events</h2>
+              <Link href="/events" className="text-sm text-gray-600 hover:text-black flex items-center">
+                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {upcomingEvents.map((event) => (
+                <div key={event.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                  <h3 className="text-sm font-medium text-gray-900">{event.title}</h3>
+                  <div className="mt-1 flex items-center text-xs text-gray-500">
+                    <CalendarIcon className="h-3 w-3 mr-1" />
+                    <span>{event.date} • {event.time}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    {event.location}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Job Highlights */}
+          <div className="content-section">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-semibold text-gray-900">Job Highlights</h2>
+              <Link href="/jobs" className="text-sm text-gray-600 hover:text-black flex items-center">
+                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {jobHighlights.map((job) => (
+                <div key={job.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                  <h3 className="text-sm font-medium text-gray-900">{job.title}</h3>
+                  <div className="mt-1 text-xs text-gray-500">
+                    {job.company} • {job.location}
+                  </div>
+                  <div className="mt-1 text-xs text-gray-400">
+                    Posted {job.postedAt}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Two-column layout for Resources and Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Activity Feed */}
@@ -280,88 +362,6 @@ function Dashboard() {
                         {resource.description}
                       </p>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Three-column layout for Events, Jobs, and Matches */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          {/* Upcoming Events */}
-          <div className="content-section">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-semibold text-gray-900">Upcoming Events</h2>
-              <Link href="/events" className="text-sm text-gray-600 hover:text-black flex items-center">
-                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
-                  <h3 className="text-sm font-medium text-gray-900">{event.title}</h3>
-                  <div className="mt-1 flex items-center text-xs text-gray-500">
-                    <CalendarIcon className="h-3 w-3 mr-1" />
-                    <span>{event.date} • {event.time}</span>
-                  </div>
-                  <div className="mt-1 text-xs text-gray-500">
-                    {event.location}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Job Highlights */}
-          <div className="content-section">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-semibold text-gray-900">Job Highlights</h2>
-              <Link href="/jobs" className="text-sm text-gray-600 hover:text-black flex items-center">
-                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {jobHighlights.map((job) => (
-                <div key={job.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
-                  <h3 className="text-sm font-medium text-gray-900">{job.title}</h3>
-                  <div className="mt-1 text-xs text-gray-500">
-                    {job.company} • {job.location}
-                  </div>
-                  <div className="mt-1 text-xs text-gray-400">
-                    Posted {job.postedAt}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Suggested Co-founders */}
-          <div className="content-section">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-semibold text-gray-900">Co-founder Matches</h2>
-              <Link href="/co-founders" className="text-sm text-gray-600 hover:text-black flex items-center">
-                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {suggestedCoFounders.map((person) => (
-                <div key={person.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-gray-900">{person.name}</h3>
-                    <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">
-                      {person.matchScore}% Match
-                    </span>
-                  </div>
-                  <div className="mt-1 text-xs text-gray-500">
-                    {person.role}
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {person.skills.map((skill, idx) => (
-                      <span key={idx} className="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded">
-                        {skill}
-                      </span>
-                    ))}
                   </div>
                 </div>
               ))}

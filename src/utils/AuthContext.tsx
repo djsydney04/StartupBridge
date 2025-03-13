@@ -31,25 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Handle demo mode
         if (isDemo) {
           console.log('Demo mode detected, creating demo user');
-          setUser({
-            id: 'demo-user-id',
-            email: 'demo@example.com',
-          });
+          const result = await signIn('demo@example.com', 'password123');
           
-          setProfile({
-            id: 'demo-profile-id',
-            user_id: 'demo-user-id',
-            university: 'Chapman University',
-            bio: 'Demo User - Computer Science Student',
-            interests: ['Startups', 'Technology', 'Entrepreneurship'],
-            created_at: new Date().toISOString(),
-            full_name: 'Demo User',
-            major: 'Computer Science',
-            year: 'Senior',
-            skills: ['Programming', 'Design', 'Marketing'],
-            linkedin_url: 'https://linkedin.com',
-            twitter_url: 'https://twitter.com'
-          });
+          if (result.success && result.user && result.profile) {
+            setUser(result.user);
+            setProfile(result.profile);
+          }
           
           setIsLoading(false);
           return;

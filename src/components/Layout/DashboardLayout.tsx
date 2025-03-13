@@ -17,6 +17,7 @@ import {
   XMarkIcon,
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
+import PageContainer from './PageContainer';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -28,7 +29,6 @@ const navItems = [
   { name: 'Job Board', href: '/jobs', icon: BriefcaseIcon },
   { name: 'Events', href: '/events', icon: CalendarIcon },
   { name: 'Resources', href: '/resources', icon: BookOpenIcon },
-  { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -188,8 +188,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Content - scrollable */}
       <div className="dashboard-content">
-        <main className="dashboard-main">
-          {children}
+        <main className="flex-1">
+          <PageContainer>
+            {children}
+          </PageContainer>
         </main>
       </div>
 

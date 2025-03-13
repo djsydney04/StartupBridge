@@ -32,19 +32,15 @@ export type Profile = {
   skills?: string[];
   linkedin_url?: string;
   twitter_url?: string;
-  // New fields for enhanced profile
-  roles?: {
-    cofounder: boolean;
-    talent: boolean;
-    job: boolean;
-    resources: boolean;
-  };
-  founder_looking_for?: string;
+  avatar_url?: string;
+  role?: string;
+  industry?: string;
+  startup_stage?: string;
+  looking_for?: string;
   startup_name?: string;
   startup_idea?: string;
   roles_looking_for?: string;
   skills_bringing?: string;
-  startup_stage?: string;
   interested_roles?: string[];
   experience?: string;
   industries_interest?: string;
@@ -122,20 +118,48 @@ export const signIn = async (email: string, password: string) => {
     
     // Only use demo login - Supabase email logins are disabled
     if (isDemo) {
-      console.log('Using demo login');
-      // Create a fake user for demo purposes
+      console.log('Demo mode detected, creating demo user');
       const demoUser = {
-        id: `demo-${Date.now()}`,
-        email: email,
-        last_sign_in_at: new Date().toISOString()
+        id: 'demo-user-id',
+        email: 'demo@example.com',
       };
       
       // Store in localStorage
       setAuthUser(demoUser);
       
+      // Create a demo profile
+      const demoProfile = {
+        id: 'demo-profile-id',
+        user_id: demoUser.id,
+        university: 'Chapman University',
+        bio: 'Passionate entrepreneur and computer science student at Chapman University. Currently working on innovative solutions in the AI and machine learning space. Looking to connect with like-minded founders and potential co-founders.',
+        interests: ['Artificial Intelligence', 'Startups', 'Technology', 'Entrepreneurship'],
+        created_at: new Date().toISOString(),
+        full_name: 'Alex Chapman',
+        major: 'Computer Science',
+        year: 'Senior',
+        skills: ['Programming', 'Machine Learning', 'Product Management', 'UI/UX Design'],
+        linkedin_url: 'https://linkedin.com/in/demo',
+        twitter_url: 'https://twitter.com/demo',
+        avatar_url: 'https://avatars.githubusercontent.com/u/12345678',
+        role: 'Founder',
+        industry: 'Technology',
+        startup_stage: 'MVP',
+        looking_for: 'Technical Co-Founder, Marketing Lead',
+        startup_name: 'AI Innovate',
+        startup_idea: 'Building an AI-powered platform that helps students find and connect with potential co-founders based on complementary skills and shared interests.',
+        roles_looking_for: 'Technical Co-Founder, Marketing Lead',
+        skills_bringing: 'Product vision, technical architecture, UI/UX design',
+        interested_roles: ['Founder', 'CTO'],
+        experience: '3 years of software development experience, previously founded a student-led startup',
+        industries_interest: 'Artificial Intelligence, EdTech, SaaS',
+        commitment_type: 'Full-time'
+      };
+      
       return { 
         success: true, 
-        user: demoUser, 
+        user: demoUser,
+        profile: demoProfile,
         isDemo: true 
       };
     } else {
