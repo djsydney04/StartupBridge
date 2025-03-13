@@ -187,47 +187,51 @@ export default function Resources() {
           </p>
         </div>
 
-        {/* Featured Resource */}
-        <div className="content-section bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100">
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1">
+        {/* Featured Resource - Ultimate Founder's Guide (Updated) */}
+        <div className="content-section bg-white border border-gray-200 shadow-sm rounded-xl mb-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-6 p-1">
+            <div className="flex-1 p-4">
               <div className="flex items-center space-x-2">
-                <FireIcon className="h-5 w-5 text-orange-500" />
-                <span className="text-sm font-semibold text-orange-600">Featured Resource</span>
+                <FireIcon className="h-5 w-5 text-gray-700" />
+                <span className="text-sm font-semibold text-gray-700">Featured Resource</span>
               </div>
               <h2 className="mt-2 text-2xl font-bold text-gray-900">{featuredResource.title}</h2>
-              <p className="mt-3 text-gray-600">{featuredResource.description}</p>
+              <p className="mt-3 text-gray-600 max-w-3xl">{featuredResource.description}</p>
               
-              <div className="mt-4 flex items-center space-x-4">
+              <div className="mt-4 flex items-center flex-wrap gap-4">
                 <span className="inline-flex items-center text-sm text-gray-500">
-                  <DocumentTextIcon className="mr-1 h-4 w-4 text-gray-400" />
+                  <DocumentTextIcon className="mr-1.5 h-4 w-4 text-gray-400" />
                   {featuredResource.readTime}
                 </span>
                 <span className="inline-flex items-center text-sm text-gray-500">
-                  <TagIcon className="mr-1 h-4 w-4 text-gray-400" />
+                  <TagIcon className="mr-1.5 h-4 w-4 text-gray-400" />
                   {featuredResource.category}
+                </span>
+                <span className="inline-flex items-center text-sm text-gray-500">
+                  <AcademicCapIcon className="mr-1.5 h-4 w-4 text-gray-400" />
+                  {featuredResource.author}
                 </span>
               </div>
               
-              <div className="mt-6">
-                <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
                   Read Playbook
                 </button>
-                <button className="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
                   <BookmarkOutlineIcon className="mr-2 h-5 w-5 text-gray-400" />
                   Save for Later
                 </button>
               </div>
             </div>
             
-            <div className="hidden md:block w-64 h-48 bg-purple-200 rounded-lg flex items-center justify-center">
-              <AcademicCapIcon className="h-24 w-24 text-purple-500 opacity-50" />
+            <div className="hidden md:flex md:items-center md:justify-center w-72 h-56 bg-gray-100 rounded-lg mr-6">
+              <LightBulbIcon className="h-24 w-24 text-gray-400" />
             </div>
           </div>
         </div>
 
         {/* Search and Filters */}
-        <div className="content-section">
+        <div className="content-section bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search Bar */}
             <div className="col-span-1 md:col-span-3">
@@ -237,7 +241,7 @@ export default function Resources() {
                 </div>
                 <input
                   type="text"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-gray-500 focus:border-gray-500 sm:text-sm"
                   placeholder="Search resources by title or keywords..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -252,7 +256,7 @@ export default function Resources() {
               </label>
               <select
                 id="category-filter"
-                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
+                className="block w-full pl-3 pr-10 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-lg"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -269,7 +273,7 @@ export default function Resources() {
               </label>
               <select
                 id="type-filter"
-                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
+                className="block w-full pl-3 pr-10 py-2.5 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-lg"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
@@ -284,16 +288,16 @@ export default function Resources() {
               <button
                 onClick={() => setViewBookmarked(!viewBookmarked)}
                 className={`
-                  inline-flex items-center px-4 py-2 border rounded-md text-sm font-medium
+                  inline-flex items-center px-4 py-2.5 border rounded-lg text-sm font-medium transition-colors
                   ${viewBookmarked 
-                    ? 'bg-purple-100 text-purple-700 border-purple-300' 
+                    ? 'bg-gray-100 text-gray-900 border-gray-300' 
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500
                 `}
               >
                 {viewBookmarked 
-                  ? <BookmarkSolidIcon className="mr-2 h-5 w-5 text-purple-600" />
+                  ? <BookmarkSolidIcon className="mr-2 h-5 w-5 text-black" />
                   : <BookmarkOutlineIcon className="mr-2 h-5 w-5 text-gray-400" />
                 }
                 {viewBookmarked ? 'Showing Bookmarked' : 'Show Bookmarked'}
@@ -305,10 +309,10 @@ export default function Resources() {
         {/* Resource Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {[
-            { name: 'Guides & Playbooks', icon: DocumentTextIcon, color: 'bg-blue-100 text-blue-600' },
-            { name: 'Templates & Tools', icon: RectangleGroupIcon, color: 'bg-green-100 text-green-600' },
-            { name: 'Videos & Workshops', icon: VideoCameraIcon, color: 'bg-red-100 text-red-600' },
-            { name: 'Checklists', icon: DocumentCheckIcon, color: 'bg-amber-100 text-amber-600' }
+            { name: 'Guides & Playbooks', icon: DocumentTextIcon, color: 'bg-gray-100 text-gray-700' },
+            { name: 'Templates & Tools', icon: RectangleGroupIcon, color: 'bg-gray-100 text-gray-700' },
+            { name: 'Videos & Workshops', icon: VideoCameraIcon, color: 'bg-gray-100 text-gray-700' },
+            { name: 'Checklists', icon: DocumentCheckIcon, color: 'bg-gray-100 text-gray-700' }
           ].map((category, idx) => (
             <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex items-center">
@@ -336,18 +340,18 @@ export default function Resources() {
           {filteredResources.map((resource) => (
             <div
               key={resource.id}
-              className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200"
+              className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200 h-[290px] flex flex-col"
             >
-              <div className="p-6">
+              <div className="p-6 flex flex-col h-full">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center">
-                      {resource.type === 'Guide' && <DocumentTextIcon className="h-6 w-6 text-purple-600" />}
-                      {resource.type === 'Template' && <DocumentArrowDownIcon className="h-6 w-6 text-blue-600" />}
-                      {resource.type === 'Checklist' && <DocumentCheckIcon className="h-6 w-6 text-amber-600" />}
-                      {resource.type === 'Video' && <VideoCameraIcon className="h-6 w-6 text-red-600" />}
-                      {resource.type === 'Masterclass' && <AcademicCapIcon className="h-6 w-6 text-green-600" />}
-                      {resource.type === 'Playbook' && <LightBulbIcon className="h-6 w-6 text-orange-600" />}
+                      {resource.type === 'Guide' && <DocumentTextIcon className="h-6 w-6 text-gray-700" />}
+                      {resource.type === 'Template' && <DocumentArrowDownIcon className="h-6 w-6 text-gray-700" />}
+                      {resource.type === 'Checklist' && <DocumentCheckIcon className="h-6 w-6 text-gray-700" />}
+                      {resource.type === 'Video' && <VideoCameraIcon className="h-6 w-6 text-gray-700" />}
+                      {resource.type === 'Masterclass' && <AcademicCapIcon className="h-6 w-6 text-gray-700" />}
+                      {resource.type === 'Playbook' && <LightBulbIcon className="h-6 w-6 text-gray-700" />}
                       <span className="ml-2 text-xs font-medium text-gray-600 uppercase">
                         {resource.type}
                       </span>
@@ -357,20 +361,20 @@ export default function Resources() {
                     </h3>
                   </div>
                   <button
-                    className="ml-4 text-gray-400 hover:text-purple-600 transition-colors duration-150"
+                    className="ml-4 text-gray-400 hover:text-black transition-colors duration-150"
                     onClick={() => {
                       // Toggle bookmark functionality
                     }}
                   >
                     {resource.isBookmarked ? (
-                      <BookmarkSolidIcon className="h-6 w-6 text-purple-600" />
+                      <BookmarkSolidIcon className="h-6 w-6 text-black" />
                     ) : (
                       <BookmarkOutlineIcon className="h-6 w-6" />
                     )}
                   </button>
                 </div>
 
-                <p className="mt-3 text-sm text-gray-600 line-clamp-2">
+                <p className="mt-3 text-sm text-gray-600 line-clamp-2 flex-grow">
                   {resource.description}
                 </p>
 
@@ -394,12 +398,12 @@ export default function Resources() {
                   <button
                     type="button"
                     className={`
-                      inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium
+                      inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium transition-colors
                       ${['Guide', 'Playbook', 'Masterclass', 'Video'].includes(resource.type)
-                        ? 'border-purple-600 text-purple-600 bg-white hover:bg-purple-50'
-                        : 'border-transparent text-white bg-purple-600 hover:bg-purple-700'
+                        ? 'border-gray-900 text-gray-900 bg-white hover:bg-gray-50'
+                        : 'border-transparent text-white bg-black hover:bg-gray-800'
                       }
-                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500
                     `}
                   >
                     {['Guide', 'Playbook', 'Masterclass', 'Video'].includes(resource.type) ? 'Read Now' : 'Download'}
@@ -412,7 +416,7 @@ export default function Resources() {
 
         {/* No Results Message */}
         {filteredResources.length === 0 && (
-          <div className="text-center py-12">
+          <div className="text-center py-12 bg-white rounded-lg border border-gray-200 shadow-sm">
             <LightBulbIcon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-lg font-medium text-gray-900">No matching resources</h3>
             <p className="mt-1 text-sm text-gray-500">
@@ -427,7 +431,7 @@ export default function Resources() {
                   setSelectedType('All Types');
                   setViewBookmarked(false);
                 }}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
               >
                 Clear All Filters
               </button>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { 
   HomeIcon, 
@@ -23,7 +24,7 @@ const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Find Co-Founders', href: '/co-founders', icon: UsersIcon },
   { name: 'Job Board', href: '/jobs', icon: BriefcaseIcon },
-  { name: 'Events & Networking', href: '/events', icon: CalendarIcon },
+  { name: 'Events', href: '/events', icon: CalendarIcon },
   { name: 'Resources', href: '/resources', icon: BookOpenIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
   { name: 'Profile & Settings', href: '/profile', icon: UserCircleIcon },
@@ -60,7 +61,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
               aria-label="Toggle sidebar"
             >
               {isSidebarOpen ? (
@@ -69,7 +70,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Bars3Icon className="h-6 w-6 text-gray-600" />
               )}
             </button>
-            <span className="ml-4 text-lg font-semibold text-purple-600">FounderConnect</span>
+            <Link href="/dashboard" className="hover:opacity-90 transition-opacity ml-2">
+              <Image 
+                src="/images/FounderConnectLogo.svg" 
+                alt="FounderConnect Logo" 
+                width={120} 
+                height={30}
+                priority
+              />
+            </Link>
           </div>
         </div>
       </div>
@@ -80,9 +89,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         aria-label="Sidebar"
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-center border-b border-gray-200">
-          <Link href="/dashboard" className="text-xl font-bold text-purple-600 hover:text-purple-700 transition-colors">
-            FounderConnect
+        <div className="h-16 flex items-center justify-center border-b border-gray-200 p-2">
+          <Link href="/dashboard" className="hover:opacity-90 transition-opacity">
+            <Image 
+              src="/images/FounderConnectLogo.svg" 
+              alt="FounderConnect Logo" 
+              width={180} 
+              height={40}
+              priority
+            />
           </Link>
         </div>
 
@@ -98,7 +113,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   group flex items-center px-4 py-3 text-sm font-medium rounded-md
                   transition-colors duration-150 ease-in-out
                   ${isActive 
-                    ? 'bg-purple-50 text-purple-600' 
+                    ? 'bg-gray-100 text-black' 
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }
                 `}
@@ -108,7 +123,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <item.icon
                   className={`
                     mr-3 h-5 w-5 flex-shrink-0
-                    ${isActive ? 'text-purple-600' : 'text-gray-400 group-hover:text-gray-500'}
+                    ${isActive ? 'text-black' : 'text-gray-400 group-hover:text-gray-500'}
                   `}
                   aria-hidden="true"
                 />
