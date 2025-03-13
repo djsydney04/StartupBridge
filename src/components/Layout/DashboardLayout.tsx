@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { useAuth } from '@/utils/AuthContext';
 import { 
   HomeIcon, 
   UsersIcon, 
@@ -13,7 +14,8 @@ import {
   ChatBubbleLeftRightIcon, 
   UserCircleIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 interface DashboardLayoutProps {
@@ -27,11 +29,11 @@ const navItems = [
   { name: 'Events', href: '/events', icon: CalendarIcon },
   { name: 'Resources', href: '/resources', icon: BookOpenIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
-  { name: 'Profile & Settings', href: '/profile', icon: UserCircleIcon },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
+  const { signOut } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -52,6 +54,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     // Cleanup
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const handleSignOut = async () => {
+    const result = await signOut();
+    if (result.success) {
+      router.push('/auth/signin');
+    }
+  };
 
   return (
     <div className="dashboard-layout">
@@ -102,35 +111,78 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-5 px-2 space-y-1" aria-label="Main navigation">
-          {navItems.map((item) => {
-            const isActive = router.pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`
-                  group flex items-center px-4 py-3 text-sm font-medium rounded-md
-                  transition-colors duration-150 ease-in-out
-                  ${isActive 
-                    ? 'bg-gray-100 text-black' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }
-                `}
-                aria-current={isActive ? 'page' : undefined}
-                onClick={() => isMobile && setIsSidebarOpen(false)}
-              >
-                <item.icon
+        <nav className="mt-5 px-2 space-y-1 flex flex-col h-[calc(100%-4rem)]" aria-label="Main navigation">
+          {/* Main menu items */}
+          <div className="flex-grow">
+            {navItems.map((item) => {
+              const isActive = router.pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
                   className={`
-                    mr-3 h-5 w-5 flex-shrink-0
-                    ${isActive ? 'text-black' : 'text-gray-400 group-hover:text-gray-500'}
+                    group flex items-center px-4 py-3 text-sm font-medium rounded-md
+                    transition-colors duration-150 ease-in-out mb-1
+                    ${isActive 
+                      ? 'bg-gray-100 text-black' 
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }
                   `}
-                  aria-hidden="true"
-                />
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
+                  aria-current={isActive ? 'page' : undefined}
+                  onClick={() => isMobile && setIsSidebarOpen(false)}
+                >
+                  <item.icon
+                    className={`
+                      mr-3 h-5 w-5 flex-shrink-0
+                      ${isActive ? 'text-black' : 'text-gray-400 group-hover:text-gray-500'}
+                    `}
+                    aria-hidden="true"
+                  />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Profile & Settings at bottom */}
+          <div className="mt-auto border-t border-gray-200 pt-2">
+            <Link
+              href="/profile"
+              className={`
+                group flex items-center px-4 py-3 text-sm font-medium rounded-md
+                transition-colors duration-150 ease-in-out mb-1
+                ${router.pathname.startsWith('/profile') 
+                  ? 'bg-gray-100 text-black' 
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }
+              `}
+              aria-current={router.pathname.startsWith('/profile') ? 'page' : undefined}
+              onClick={() => isMobile && setIsSidebarOpen(false)}
+            >
+              <UserCircleIcon
+                className={`
+                  mr-3 h-5 w-5 flex-shrink-0
+                  ${router.pathname.startsWith('/profile') ? 'text-black' : 'text-gray-400 group-hover:text-gray-500'}
+                `}
+                aria-hidden="true"
+              />
+              <span>Profile & Settings</span>
+            </Link>
+
+            {/* Sign Out Button */}
+            <button
+              onClick={handleSignOut}
+              className="w-full group flex items-center px-4 py-3 text-sm font-medium rounded-md
+                transition-colors duration-150 ease-in-out
+                text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            >
+              <ArrowRightOnRectangleIcon
+                className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
+                aria-hidden="true"
+              />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </nav>
       </aside>
 
