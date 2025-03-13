@@ -7,7 +7,13 @@ import {
   BoltIcon,
   BriefcaseIcon,
   CalendarIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  BookOpenIcon,
+  DocumentTextIcon,
+  ClockIcon,
+  ArrowRightIcon,
+  UsersIcon,
+  FireIcon
 } from '@heroicons/react/24/outline';
 
 const quickActions = [
@@ -15,7 +21,7 @@ const quickActions = [
     name: 'Find Co-Founders',
     description: 'Connect with potential startup partners',
     href: '/co-founders',
-    icon: BoltIcon,
+    icon: UsersIcon,
     color: 'bg-purple-500'
   },
   {
@@ -31,6 +37,13 @@ const quickActions = [
     href: '/events',
     icon: CalendarIcon,
     color: 'bg-green-500'
+  },
+  {
+    name: 'Resources Library',
+    description: 'Access guides, templates and tools',
+    href: '/resources',
+    icon: BookOpenIcon,
+    color: 'bg-orange-500'
   }
 ];
 
@@ -41,21 +54,109 @@ const recentActivity = [
     type: 'connection',
     title: 'New Co-founder Request',
     description: 'Sarah Chen wants to connect with you',
-    time: '2 hours ago'
+    time: '2 hours ago',
+    icon: UsersIcon,
+    color: 'text-purple-500'
   },
   {
     id: 2,
     type: 'job',
     title: 'New Job Posted',
     description: 'Frontend Developer at TechStartup',
-    time: '3 hours ago'
+    time: '3 hours ago',
+    icon: BriefcaseIcon,
+    color: 'text-blue-500'
   },
   {
     id: 3,
     type: 'event',
     title: 'Upcoming Event',
     description: 'Startup Pitch Competition this Friday',
-    time: '1 day ago'
+    time: '1 day ago',
+    icon: CalendarIcon,
+    color: 'text-green-500'
+  }
+];
+
+// Mock resources
+const featuredResources = [
+  {
+    id: 1,
+    title: 'Startup Pitch Deck Template',
+    type: 'Template',
+    description: 'A professional pitch deck template for student-led startups.',
+    category: 'Pitch Materials',
+    icon: DocumentTextIcon
+  },
+  {
+    id: 2,
+    title: 'Finding Co-Founder Chemistry',
+    type: 'Guide',
+    description: 'How to find and evaluate potential co-founders for your startup journey.',
+    category: 'Team Building',
+    icon: UsersIcon
+  },
+  {
+    id: 3,
+    title: 'Startup Legal Checklist',
+    type: 'Checklist',
+    description: 'Essential legal steps to take when launching your startup.',
+    category: 'Legal',
+    icon: DocumentTextIcon
+  }
+];
+
+// Mock upcoming events
+const upcomingEvents = [
+  {
+    id: 1,
+    title: 'Startup Pitch Competition',
+    date: 'Nov 15, 2023',
+    time: '3:00 PM - 6:00 PM',
+    location: 'Chapman Entrepreneurship Center'
+  },
+  {
+    id: 2,
+    title: 'VC Office Hours',
+    date: 'Nov 17, 2023',
+    time: '10:00 AM - 2:00 PM',
+    location: 'Online (Zoom)'
+  }
+];
+
+// Mock job highlights
+const jobHighlights = [
+  {
+    id: 1,
+    title: 'Frontend Developer',
+    company: 'TechStartup',
+    location: 'Remote',
+    postedAt: '3 days ago'
+  },
+  {
+    id: 2,
+    title: 'Growth Marketer',
+    company: 'Chapman Ventures',
+    location: 'Orange, CA',
+    postedAt: '1 day ago'
+  }
+];
+
+// Mock suggested co-founders
+const suggestedCoFounders = [
+  {
+    id: 1,
+    name: 'Alex Johnson',
+    role: 'Developer',
+    skills: ['Full-Stack', 'AI', 'Mobile'],
+    matchScore: 95
+  },
+  {
+    id: 2,
+    name: 'Mia Chen',
+    role: 'Designer',
+    skills: ['UI/UX', 'Branding', 'Product'],
+    matchScore: 87
   }
 ];
 
@@ -86,7 +187,7 @@ function Dashboard() {
 
         {/* Quick Actions Grid */}
         <div className="content-section">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-5">Quick Actions</h2>
           <div className="content-grid">
             {quickActions.map((action) => (
               <Link
@@ -110,29 +211,161 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Activity Feed */}
-        <div className="content-section">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Recent Activity</h2>
-          <div className="divide-y divide-gray-200">
-            {recentActivity.map((activity) => (
-              <div
-                key={activity.id}
-                className="py-4 flex items-center justify-between hover:bg-gray-50 transition-colors duration-150 rounded-lg px-4"
-              >
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-gray-900">
-                    {activity.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {activity.description}
-                  </p>
+        {/* Two-column layout for Resources and Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Activity Feed */}
+          <div className="content-section">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
+              <Link href="/profile" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
+              </Link>
+            </div>
+            <div className="divide-y divide-gray-200">
+              {recentActivity.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="py-3 flex items-center justify-between hover:bg-gray-50 transition-colors duration-150 rounded-lg px-3"
+                >
+                  <div className="flex items-start">
+                    <span className={`inline-flex p-2 rounded-lg bg-gray-100 mr-3`}>
+                      <activity.icon className={`h-4 w-4 ${activity.color}`} aria-hidden="true" />
+                    </span>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">
+                        {activity.title}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {activity.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center ml-4">
+                    <span className="text-xs text-gray-500">{activity.time}</span>
+                    <ChevronRightIcon className="ml-1 h-4 w-4 text-gray-400" />
+                  </div>
                 </div>
-                <div className="flex items-center ml-4">
-                  <span className="text-sm text-gray-500">{activity.time}</span>
-                  <ChevronRightIcon className="ml-2 h-5 w-5 text-gray-400" />
+              ))}
+            </div>
+          </div>
+
+          {/* Featured Resources */}
+          <div className="content-section">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-semibold text-gray-900">Featured Resources</h2>
+              <Link href="/resources" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {featuredResources.map((resource) => (
+                <div key={resource.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <div className="flex items-start">
+                    <span className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-purple-100 text-purple-600 mr-3">
+                      <resource.icon className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <div className="flex items-center mb-1">
+                        <span className="text-xs font-medium text-purple-600 bg-purple-50 py-0.5 px-2 rounded">
+                          {resource.type}
+                        </span>
+                        <span className="text-xs text-gray-500 ml-2">
+                          {resource.category}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-medium text-gray-900">
+                        {resource.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                        {resource.description}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Three-column layout for Events, Jobs, and Matches */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          {/* Upcoming Events */}
+          <div className="content-section">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-semibold text-gray-900">Upcoming Events</h2>
+              <Link href="/events" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {upcomingEvents.map((event) => (
+                <div key={event.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                  <h3 className="text-sm font-medium text-gray-900">{event.title}</h3>
+                  <div className="mt-1 flex items-center text-xs text-gray-500">
+                    <CalendarIcon className="h-3 w-3 mr-1" />
+                    <span>{event.date} • {event.time}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    {event.location}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Job Highlights */}
+          <div className="content-section">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-semibold text-gray-900">Job Highlights</h2>
+              <Link href="/jobs" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {jobHighlights.map((job) => (
+                <div key={job.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                  <h3 className="text-sm font-medium text-gray-900">{job.title}</h3>
+                  <div className="mt-1 text-xs text-gray-500">
+                    {job.company} • {job.location}
+                  </div>
+                  <div className="mt-1 text-xs text-gray-400">
+                    Posted {job.postedAt}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Suggested Co-founders */}
+          <div className="content-section">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-semibold text-gray-900">Co-founder Matches</h2>
+              <Link href="/co-founders" className="text-sm text-purple-600 hover:text-purple-800 flex items-center">
+                View All <ArrowRightIcon className="ml-1 h-3 w-3" />
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {suggestedCoFounders.map((person) => (
+                <div key={person.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-gray-900">{person.name}</h3>
+                    <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
+                      {person.matchScore}% Match
+                    </span>
+                  </div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    {person.role}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {person.skills.map((skill, idx) => (
+                      <span key={idx} className="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
