@@ -20,10 +20,16 @@ import {
   ChatBubbleLeftRightIcon,
   UserCircleIcon,
   LinkIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  ClipboardDocumentIcon,
+  CheckIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import EmailIcon from '/public/images/EmailIcon.svg';
+import EnvelopeIconSvg from '/public/images/envelope.svg';
+
+// Add LinkedIn and X logo imports
+import LinkedInLogo from '/public/images/LinkedIn.png';
+import XLogo from '/public/images/XLogo.png';
 
 // Define types for our data
 interface Founder {
@@ -169,7 +175,8 @@ const mockFounders: Founder[] = [
     imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     isBookmarked: false,
     linkedInUrl: 'https://linkedin.com/in/sarahchen',
-    twitterUrl: 'https://twitter.com/sarahchentech'
+    twitterUrl: 'https://twitter.com/sarahchentech',
+    email: 'sarah.chen@example.com'
   },
   {
     id: 2,
@@ -186,7 +193,8 @@ const mockFounders: Founder[] = [
     mutualConnections: 2,
     imageUrl: 'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     isBookmarked: true,
-    linkedInUrl: 'https://linkedin.com/in/michaelrodriguez'
+    linkedInUrl: 'https://linkedin.com/in/michaelrodriguez',
+    email: 'michael.rodriguez@example.com'
   },
   {
     id: 3,
@@ -203,7 +211,8 @@ const mockFounders: Founder[] = [
     mutualConnections: 1,
     imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     isBookmarked: false,
-    twitterUrl: 'https://twitter.com/emilywangdesign'
+    twitterUrl: 'https://twitter.com/emilywangdesign',
+    email: 'emily.wang@example.com'
   },
   {
     id: 4,
@@ -221,7 +230,8 @@ const mockFounders: Founder[] = [
     imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     isBookmarked: false,
     linkedInUrl: 'https://linkedin.com/in/davidkim',
-    twitterUrl: 'https://twitter.com/davidkimtech'
+    twitterUrl: 'https://twitter.com/davidkimtech',
+    email: 'david.kim@example.com'
   },
   {
     id: 5,
@@ -238,7 +248,8 @@ const mockFounders: Founder[] = [
     mutualConnections: 2,
     imageUrl: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     isBookmarked: false,
-    linkedInUrl: 'https://linkedin.com/in/aishajohnson'
+    linkedInUrl: 'https://linkedin.com/in/aishajohnson',
+    email: 'aisha.johnson@example.com'
   },
 ];
 
@@ -248,8 +259,24 @@ interface ProfileModalProps {
   onClose: () => void;
 }
 
+function copyToClipboard(text: string) {
+  navigator.clipboard.writeText(text).catch(err => {
+    console.error('Could not copy text: ', err);
+  });
+}
+
 function ProfileModal({ founder, isOpen, onClose }: ProfileModalProps) {
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  
   if (!isOpen) return null;
+
+  const handleCopyEmail = () => {
+    if (founder.email) {
+      copyToClipboard(founder.email);
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2000);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -286,13 +313,19 @@ function ProfileModal({ founder, isOpen, onClose }: ProfileModalProps) {
                   </div>
                   <div className="flex items-center space-x-3">
                     {founder.email && (
-                      <a 
-                        href={`mailto:${founder.email}`}
-                        className="text-gray-400 hover:text-gray-700 transition-colors"
-                        aria-label="Email"
+                      <button 
+                        onClick={handleCopyEmail}
+                        className="text-gray-400 hover:text-gray-700 transition-colors relative group"
+                        aria-label="Copy Email"
+                        title="Copy Email"
                       >
                         <EnvelopeIcon className="h-5 w-5" />
-                      </a>
+                        {copiedEmail && (
+                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
+                            Copied!
+                          </span>
+                        )}
+                      </button>
                     )}
                     {founder.linkedInUrl && (
                       <a
@@ -300,10 +333,30 @@ function ProfileModal({ founder, isOpen, onClose }: ProfileModalProps) {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-700 transition-colors"
+                        title="LinkedIn"
                       >
-                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                        </svg>
+                        <Image
+                          src={LinkedInLogo}
+                          alt="LinkedIn"
+                          width={20}
+                          height={20}
+                        />
+                      </a>
+                    )}
+                    {founder.twitterUrl && (
+                      <a
+                        href={founder.twitterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-gray-700 transition-colors"
+                        title="X (Twitter)"
+                      >
+                        <Image
+                          src={XLogo}
+                          alt="X (Twitter)"
+                          width={20}
+                          height={20}
+                        />
                       </a>
                     )}
                   </div>
@@ -399,6 +452,7 @@ function CoFounders() {
   const [expandedFilterGroup, setExpandedFilterGroup] = useState<string | null>(null);
   const [selectedFounder, setSelectedFounder] = useState<Founder | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [copiedEmails, setCopiedEmails] = useState<{[key: number]: boolean}>({});
 
   // Sort by match score initially
   useEffect(() => {
@@ -425,6 +479,14 @@ function CoFounders() {
     setFounders(founders.map(founder => 
       founder.id === id ? {...founder, isBookmarked: !founder.isBookmarked} : founder
     ));
+  };
+
+  const handleCopyEmail = (founderId: number, email: string) => {
+    copyToClipboard(email);
+    setCopiedEmails({...copiedEmails, [founderId]: true});
+    setTimeout(() => {
+      setCopiedEmails({...copiedEmails, [founderId]: false});
+    }, 2000);
   };
 
   // Filter founders based on search, bookmarks, and active filters
@@ -544,7 +606,7 @@ function CoFounders() {
           {recommendedFounders.map((founder) => (
             <div 
               key={`rec-${founder.id}`}
-              className="flex-shrink-0 w-80 h-[380px] bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col"
+              className="flex-shrink-0 w-80 h-[450px] bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md flex flex-col"
             >
               <div className="p-6 flex flex-col flex-grow">
                 {/* Header - Improved layout */}
@@ -576,28 +638,50 @@ function CoFounders() {
                 {/* Social Media Links */}
                 <div className="mt-4 flex items-center">
                   <div className="flex space-x-3">
-                    <a
-                      href={`mailto:${founder.email}`}
-                      className="text-gray-400 hover:text-gray-600"
-                      title="Send Email"
-                    >
-                      <Image
-                        src={EmailIcon}
-                        alt="Email"
-                        width={16}
-                        height={16}
-                      />
-                    </a>
+                    {founder.email && (
+                      <button
+                        onClick={() => handleCopyEmail(founder.id, founder.email!)}
+                        className="text-gray-400 hover:text-gray-600 relative group"
+                        title="Copy Email"
+                      >
+                        <EnvelopeIcon className="h-4 w-4" />
+                        {copiedEmails[founder.id] && (
+                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
+                            Copied!
+                          </span>
+                        )}
+                      </button>
+                    )}
                     {founder.linkedInUrl && (
                       <a
                         href={founder.linkedInUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-600"
+                        title="LinkedIn"
                       >
-                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z" />
-                        </svg>
+                        <Image
+                          src={LinkedInLogo}
+                          alt="LinkedIn"
+                          width={16}
+                          height={16}
+                        />
+                      </a>
+                    )}
+                    {founder.twitterUrl && (
+                      <a
+                        href={founder.twitterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-gray-600"
+                        title="X (Twitter)"
+                      >
+                        <Image
+                          src={XLogo}
+                          alt="X"
+                          width={16}
+                          height={16}
+                        />
                       </a>
                     )}
                   </div>
@@ -612,7 +696,7 @@ function CoFounders() {
                 </div>
                 
                 {/* One liner with fixed height */}
-                <div className="mt-4 min-h-[50px] flex-grow">
+                <div className="mt-4 h-[50px] flex-grow">
                   <p className="text-sm text-gray-600 line-clamp-2">
                     "{founder.oneLiner}"
                   </p>
@@ -810,9 +894,9 @@ function CoFounders() {
                 expandedFounder === founder.id 
                   ? 'border-gray-400 shadow-md scale-102 translate-y-0' 
                   : 'border-gray-100 hover:border-gray-200'
-              } ${expandedFounder === founder.id ? '' : 'h-[450px]'}`}
+              } h-[450px] flex flex-col`}
             >
-              <div className="p-6 h-full flex flex-col">
+              <div className="p-6 flex flex-col h-full">
                 {/* Header with profile pic, name, and match score */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start">
@@ -862,18 +946,18 @@ function CoFounders() {
                   {/* Social Media Icons */}
                   <div className="flex items-center space-x-3">
                     {founder.email && (
-                      <a
-                        href={`mailto:${founder.email}`}
-                        className="text-gray-400 hover:text-gray-600"
-                        title="Send Email"
+                      <button
+                        onClick={() => handleCopyEmail(founder.id, founder.email!)}
+                        className="text-gray-400 hover:text-gray-600 relative group"
+                        title="Copy Email"
                       >
-                        <Image
-                          src={EmailIcon}
-                          alt="Email"
-                          width={16}
-                          height={16}
-                        />
-                      </a>
+                        <EnvelopeIcon className="h-4 w-4" />
+                        {copiedEmails[founder.id] && (
+                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
+                            Copied!
+                          </span>
+                        )}
+                      </button>
                     )}
                     {founder.linkedInUrl && (
                       <a
@@ -881,10 +965,30 @@ function CoFounders() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-600"
+                        title="LinkedIn"
                       >
-                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z" />
-                        </svg>
+                        <Image
+                          src={LinkedInLogo}
+                          alt="LinkedIn"
+                          width={16}
+                          height={16}
+                        />
+                      </a>
+                    )}
+                    {founder.twitterUrl && (
+                      <a
+                        href={founder.twitterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-gray-600"
+                        title="X (Twitter)"
+                      >
+                        <Image
+                          src={XLogo}
+                          alt="X"
+                          width={16}
+                          height={16}
+                        />
                       </a>
                     )}
                   </div>
@@ -897,10 +1001,10 @@ function CoFounders() {
                   </p>
                 </div>
                 
-                {/* Skills with max height */}
+                {/* Skills with fixed height - limiting to prevent overflow */}
                 <div className="mt-5">
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Skills</h4>
-                  <div className="flex flex-wrap gap-2 max-h-[70px] overflow-y-auto pr-1">
+                  <div className="flex flex-wrap gap-2 max-h-[60px] overflow-y-auto pr-1">
                     {founder.skills.map((skill) => (
                       <span
                         key={skill}
@@ -912,10 +1016,10 @@ function CoFounders() {
                   </div>
                 </div>
                 
-                {/* Interests with max height */}
+                {/* Interests with fixed height - limiting to prevent overflow */}
                 <div className="mt-4">
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Interests</h4>
-                  <div className="flex flex-wrap gap-2 max-h-[70px] overflow-y-auto pr-1">
+                  <div className="flex flex-wrap gap-2 max-h-[60px] overflow-y-auto pr-1">
                     {founder.interests.map((interest) => (
                       <span
                         key={interest}
@@ -927,10 +1031,10 @@ function CoFounders() {
                   </div>
                 </div>
                 
-                {/* Additional info when expanded */}
+                {/* Additional info when expanded - with fixed height */}
                 {expandedFounder === founder.id && (
-                  <div className="mt-5 pt-4 border-t border-gray-100 animate-fadeIn">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="mt-4 pt-3 border-t border-gray-100 animate-fadeIn">
+                    <div className="grid grid-cols-2 gap-4 mb-2">
                       <div>
                         <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Availability</h4>
                         <div className="flex flex-wrap gap-1">
@@ -952,20 +1056,26 @@ function CoFounders() {
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
                       <div className="flex items-center">
                         <CheckBadgeIcon className="h-4 w-4 text-green-500 mr-1 flex-shrink-0" />
                         <span>{founder.endorsements} endorsements</span>
                       </div>
-                      <button className="text-black hover:text-gray-700 font-medium">
+                      <button 
+                        className="text-black hover:text-gray-700 font-medium"
+                        onClick={() => {
+                          setSelectedFounder(founder);
+                          setIsProfileModalOpen(true);
+                        }}
+                      >
                         View Full Profile
                       </button>
                     </div>
                   </div>
                 )}
                 
-                {/* Action buttons */}
-                <div className="mt-auto pt-4 grid grid-cols-2 gap-3">
+                {/* Action buttons - placed at mt-auto to always stay at the bottom */}
+                <div className="mt-auto pt-2 grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     className="inline-flex items-center justify-center px-3 py-2.5 border border-gray-900 text-sm font-medium rounded-lg text-gray-900 bg-white hover:bg-gray-50 transition-colors duration-200"
