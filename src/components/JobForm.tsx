@@ -10,7 +10,7 @@ export interface JobFormData {
   description: string;
   skills: string[];
   applicationFormUrl: string;
-  compensation: string;
+  compensation?: string;
 }
 
 interface JobFormProps {
@@ -119,12 +119,11 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, onCancel }) =>
 
         <div>
           <label htmlFor="compensation" className="block text-sm font-medium text-gray-700">
-            Compensation *
+            Compensation (Optional)
           </label>
           <input
             type="text"
             id="compensation"
-            required
             value={formData.compensation}
             onChange={(e) => setFormData({ ...formData, compensation: e.target.value })}
             placeholder="e.g., $20-25/hour, Equity Only, etc."

@@ -40,7 +40,6 @@ Requirements:
 - Excellent problem-solving and communication skills`,
     skills: ['React', 'TypeScript', 'Tailwind CSS'],
     postedDate: '2 days ago',
-    logo: 'https://tailwindui.com/img/logos/mark.svg?color=black&shade=600',
     applicationFormUrl: 'https://forms.example.com/apply',
     compensation: '$30-40/hour'
   },
@@ -179,14 +178,7 @@ function Jobs() {
           >
             <div className="p-8">
               <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <img
-                    className="h-12 w-12 rounded-md"
-                    src={job.logo}
-                    alt={job.company}
-                  />
-                </div>
-                <div className="ml-4 flex-1">
+                <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-medium text-gray-900">
@@ -225,9 +217,11 @@ function Jobs() {
                         <ClockIcon className="h-3.5 w-3.5 mr-1" />
                         {job.hoursPerWeek}
                       </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                        {job.compensation}
-                      </span>
+                      {job.compensation && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                          {job.compensation}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <p className="mt-2 text-sm text-gray-600">

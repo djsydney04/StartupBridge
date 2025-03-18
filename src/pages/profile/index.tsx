@@ -24,7 +24,7 @@ interface CoFounderConnection {
 }
 
 export default function ProfilePage() {
-  const { user, profile: initialProfile, updateProfile: updateAuthProfile } = useAuth();
+  const { user, profile: initialProfile, updateProfile: updateAuthProfile, uploadAvatar } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [editSection, setEditSection] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -55,6 +55,8 @@ export default function ProfilePage() {
   });
   const [requests, setRequests] = useState<CoFounderRequest[]>([]);
   const [connections, setConnections] = useState<CoFounderConnection[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialProfile) {
@@ -86,6 +88,29 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setIsUploading(true);
+    setUploadError(null);
+    
+    try {
+      const result = await uploadAvatar(file);
+      
+      if (result.success) {
+        // Profile state is already updated in the AuthContext when upload is successful
+      } else {
+        setUploadError(result.error || 'Failed to upload avatar');
+      }
+    } catch (error: any) {
+      setUploadError(error.message || 'An unexpected error occurred');
+      console.error('Error uploading avatar:', error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -125,7 +150,36 @@ export default function ProfilePage() {
                               ) : (
                                 <UserCircleIcon className="h-full w-full text-gray-300" />
                               )}
+                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
+                                {isUploading ? (
+                                  <div className="text-white text-xs text-center">
+                                    <svg className="animate-spin h-4 w-4 mx-auto mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Uploading...
+                                  </div>
+                                ) : (
+                                  <label htmlFor="avatarUpload" className="cursor-pointer text-white text-xs font-medium text-center p-1">
+                                    <PencilIcon className="h-4 w-4 mx-auto mb-1" />
+                                    Change Photo
+                                  </label>
+                                )}
+                                <input 
+                                  type="file" 
+                                  id="avatarUpload" 
+                                  className="hidden" 
+                                  accept="image/*"
+                                  onChange={handleAvatarChange}
+                                  disabled={isUploading}
+                                />
+                              </div>
                             </div>
+                            {uploadError && (
+                              <p className="text-chapman-red text-xs mt-1">
+                                {uploadError}
+                              </p>
+                            )}
                           </div>
                           <div>
                             <h1 className="text-2xl font-bold text-gray-900">{profile.full_name}</h1>

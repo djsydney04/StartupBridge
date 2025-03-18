@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/router';
-import { supabase, signIn, signOut, isAuthenticated, getProfile, getAuthUser, updateProfile, User, Profile } from './supabase';
+import { supabase, signIn, signOut, isAuthenticated, getProfile, getAuthUser, updateProfile, uploadAvatar, User, Profile } from './supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -11,6 +11,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: any }>;
   signOut: () => Promise<{ success: boolean; error?: any }>;
   updateProfile: (profileData: Partial<Profile>) => Promise<{ success: boolean; profile?: Profile; error?: any }>;
+  uploadAvatar: (file: File) => Promise<{ success: boolean; profile?: Profile; url?: string; error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -141,7 +142,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: false, error: error.message };
     }
   };
-  
+
+  const handleUploadAvatar = async (file: File) => {
+    if (!user?.id) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    try {
+      const result = await uploadAvatar(user.id, file);
+      
+      if (result.success && result.profile) {
+        setProfile(result.profile);
+      }
+      
+      return result;
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      return { success: false, error: error.message || 'An unexpected error occurred' };
+    }
+  };
+
   const value = {
     user,
     profile,
@@ -149,6 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn: handleSignIn,
     signOut: handleSignOut,
     updateProfile: handleUpdateProfile,
+    uploadAvatar: handleUploadAvatar
   };
   
   return (

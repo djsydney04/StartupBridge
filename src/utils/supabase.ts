@@ -503,6 +503,81 @@ export const updateProfile = async (userId: string, profileData: Partial<Profile
   }
 };
 
+/**
+ * Upload a profile avatar image to storage
+ */
+export const uploadAvatar = async (userId: string, file: File) => {
+  try {
+    // First, check if a 'avatars' bucket exists, if not, create it
+    const { data: bucketData, error: bucketError } = await supabase
+      .storage
+      .getBucket('avatars');
+    
+    if (bucketError && bucketError.message.includes('does not exist')) {
+      // Create the bucket if it doesn't exist
+      await supabase.storage.createBucket('avatars', {
+        public: true,
+        fileSizeLimit: 1024 * 1024 * 2 // 2MB
+      });
+    }
+    
+    // Upload the file to storage
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+    const filePath = `${fileName}`;
+    
+    const { error: uploadError } = await supabase
+      .storage
+      .from('avatars')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+    
+    if (uploadError) {
+      console.error('Error uploading avatar:', uploadError.message);
+      return { 
+        success: false, 
+        error: uploadError.message 
+      };
+    }
+    
+    // Get the public URL for the uploaded file
+    const { data: urlData } = supabase
+      .storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+    
+    // Update the user's profile with the new avatar URL
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ avatar_url: urlData.publicUrl })
+      .eq('user_id', userId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating profile with avatar URL:', error.message);
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    }
+    
+    return { 
+      success: true, 
+      profile: data,
+      url: urlData.publicUrl
+    };
+  } catch (error: any) {
+    console.error('Unexpected error uploading avatar:', error);
+    return { 
+      success: false, 
+      error: error.message || 'An unexpected error occurred' 
+    };
+  }
+};
+
 // ========== CONNECTIONS FUNCTIONS ==========
 
 /**

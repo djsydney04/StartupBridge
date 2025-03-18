@@ -1,4 +1,4 @@
-const fs = require('fs');
+nconst fs = require('fs');
 const path = require('path');
 const Identicon = require('identicon.js');
 
