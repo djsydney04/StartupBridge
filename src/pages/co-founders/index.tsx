@@ -285,8 +285,8 @@ function ProfileModal({ founder, isOpen, onClose }: ProfileModalProps) {
           <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={onClose}></div>
         </div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-          <div className="absolute top-0 right-0 pt-4 pr-4">
+        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full flex flex-col max-h-[90vh]">
+          <div className="absolute top-0 right-0 pt-4 pr-4 z-10">
             <button
               onClick={onClose}
               className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
@@ -295,124 +295,125 @@ function ProfileModal({ founder, isOpen, onClose }: ProfileModalProps) {
             </button>
           </div>
 
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="sm:flex sm:items-start">
-              <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center">
-                    <img
-                      src={founder.imageUrl}
-                      alt={founder.name}
-                      className="h-16 w-16 rounded-full object-cover"
-                    />
-                    <div className="ml-4">
-                      <h3 className="text-2xl font-bold text-gray-900">{founder.name}</h3>
-                      <p className="text-gray-600">{founder.role}</p>
-                      <p className="text-sm text-gray-500">{founder.location}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    {founder.email && (
-                      <button 
-                        onClick={handleCopyEmail}
-                        className="text-gray-400 hover:text-gray-700 transition-colors relative group"
-                        aria-label="Copy Email"
-                        title="Copy Email"
-                      >
-                        <EnvelopeIcon className="h-5 w-5" />
-                        {copiedEmail && (
-                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
-                            Copied!
-                          </span>
-                        )}
-                      </button>
-                    )}
-                    {founder.linkedInUrl && (
-                      <a
-                        href={founder.linkedInUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-gray-700 transition-colors"
-                        title="LinkedIn"
-                      >
-                        <Image
-                          src={LinkedInLogo}
-                          alt="LinkedIn"
-                          width={20}
-                          height={20}
-                        />
-                      </a>
-                    )}
-                    {founder.twitterUrl && (
-                      <a
-                        href={founder.twitterUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-gray-700 transition-colors"
-                        title="X (Twitter)"
-                      >
-                        <Image
-                          src={XLogo}
-                          alt="X (Twitter)"
-                          width={20}
-                          height={20}
-                        />
-                      </a>
-                    )}
-                  </div>
+          {/* Fixed header with profile info */}
+          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <img
+                  src={founder.imageUrl}
+                  alt={founder.name}
+                  className="h-16 w-16 rounded-full object-cover"
+                />
+                <div className="ml-4">
+                  <h3 className="text-2xl font-bold text-gray-900">{founder.name}</h3>
+                  <p className="text-gray-600">{founder.role}</p>
+                  <p className="text-sm text-gray-500">{founder.location}</p>
                 </div>
-
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">About</h4>
-                  <p className="text-gray-600">{founder.about || founder.oneLiner}</p>
-                </div>
-
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Skills</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {founder.skills.map((skill, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-                        {skill}
+              </div>
+              <div className="flex items-center space-x-3">
+                {founder.email && (
+                  <button 
+                    onClick={handleCopyEmail}
+                    className="text-gray-400 hover:text-gray-700 transition-colors relative group"
+                    aria-label="Copy Email"
+                    title="Copy Email"
+                  >
+                    <EnvelopeIcon className="h-5 w-5" />
+                    {copiedEmail && (
+                      <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
+                        Copied!
                       </span>
-                    ))}
-                  </div>
-                </div>
-
-                {founder.experience && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Experience</h4>
-                    <div className="space-y-4">
-                      {founder.experience.map((exp, idx) => (
-                        <div key={idx} className="border-l-2 border-gray-200 pl-4">
-                          <h5 className="font-medium text-gray-900">{exp.title}</h5>
-                          <p className="text-sm text-gray-600">{exp.company}</p>
-                          <p className="text-sm text-gray-500">{exp.duration}</p>
-                          <p className="text-sm text-gray-600 mt-1">{exp.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                    )}
+                  </button>
                 )}
-
-                {founder.education && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Education</h4>
-                    <div className="space-y-3">
-                      {founder.education.map((edu, idx) => (
-                        <div key={idx}>
-                          <h5 className="font-medium text-gray-900">{edu.school}</h5>
-                          <p className="text-sm text-gray-600">{edu.degree}</p>
-                          <p className="text-sm text-gray-500">{edu.year}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {founder.linkedInUrl && (
+                  <a
+                    href={founder.linkedInUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-gray-700 transition-colors"
+                    title="LinkedIn"
+                  >
+                    <Image
+                      src={LinkedInLogo}
+                      alt="LinkedIn"
+                      width={20}
+                      height={20}
+                    />
+                  </a>
+                )}
+                {founder.twitterUrl && (
+                  <a
+                    href={founder.twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-gray-700 transition-colors"
+                    title="X (Twitter)"
+                  >
+                    <Image
+                      src={XLogo}
+                      alt="X (Twitter)"
+                      width={20}
+                      height={20}
+                    />
+                  </a>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          {/* Scrollable content area */}
+          <div className="bg-white px-4 py-4 sm:px-6 overflow-y-auto flex-1">
+            <div className="mb-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">About</h4>
+              <p className="text-gray-600">{founder.about || founder.oneLiner}</p>
+            </div>
+
+            <div className="mb-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">Skills</h4>
+              <div className="flex flex-wrap gap-2">
+                {founder.skills.map((skill, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {founder.experience && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Experience</h4>
+                <div className="space-y-4">
+                  {founder.experience.map((exp, idx) => (
+                    <div key={idx} className="border-l-2 border-gray-200 pl-4">
+                      <h5 className="font-medium text-gray-900">{exp.title}</h5>
+                      <p className="text-sm text-gray-600">{exp.company}</p>
+                      <p className="text-sm text-gray-500">{exp.duration}</p>
+                      <p className="text-sm text-gray-600 mt-1">{exp.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {founder.education && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Education</h4>
+                <div className="space-y-3">
+                  {founder.education.map((edu, idx) => (
+                    <div key={idx}>
+                      <h5 className="font-medium text-gray-900">{edu.school}</h5>
+                      <p className="text-sm text-gray-600">{edu.degree}</p>
+                      <p className="text-sm text-gray-500">{edu.year}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Fixed footer with buttons */}
+          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t">
             <button
               type="button"
               className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:ml-3 sm:w-auto sm:text-sm"
