@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, Fragment } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { 
@@ -10,41 +10,126 @@ import {
   CalendarIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  CheckIcon,
+  XMarkIcon,
+  FunnelIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { Combobox, Transition } from '@headlessui/react';
+import { skillCategories as skillCategoriesData } from '../../utils/skillCategories';
+import { mockJobs } from '../../utils/mockData';
 
-// Mock job data (replace with real data later)
-const mockJobs = [
-  {
-    id: 1,
-    title: 'Frontend Developer',
-    company: 'TechStartup Inc.',
-    location: 'Irvine, CA',
-    hoursPerWeek: '40 hours/week',
-    description: 'Looking for a passionate frontend developer to join our growing team. Experience with React and TypeScript required.',
-    detailedDescription: `We are seeking a talented Frontend Developer to join our growing team. The ideal candidate will have a strong foundation in modern web technologies and a passion for creating exceptional user experiences.
-
-Key Responsibilities:
-- Develop and maintain responsive web applications using React and TypeScript
-- Collaborate with designers to implement pixel-perfect UI components
-- Write clean, maintainable, and well-documented code
-- Participate in code reviews and contribute to technical discussions
-- Optimize applications for maximum speed and scalability
-
-Requirements:
-- 2+ years of experience with React and TypeScript
-- Strong understanding of HTML, CSS, and JavaScript
-- Experience with modern frontend tools and build systems
-- Knowledge of responsive design and cross-browser compatibility
-- Excellent problem-solving and communication skills`,
-    skills: ['React', 'TypeScript', 'Tailwind CSS'],
-    postedDate: '2 days ago',
-    applicationFormUrl: 'https://forms.example.com/apply',
-    compensation: '$30-40/hour'
+// Define skill categories and their associated skills
+const skillCategories = {
+  technicalSkills: {
+    name: 'Technical Skills',
+    skills: {
+      'frontend': ['React', 'Angular', 'Vue.js', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'Next.js', 'Gatsby', 'Redux', 'WebGL', 'Three.js', 'Responsive Design', 'Web Performance'],
+      'backend': ['Node.js', 'Python', 'Java', 'C#', 'Ruby', 'PHP', 'SQL', 'MongoDB', 'PostgreSQL', 'Redis', 'GraphQL', 'REST APIs', 'Microservices', 'System Design', 'API Design'],
+      'mobile': ['React Native', 'Flutter', 'iOS', 'Android', 'Swift', 'Kotlin', 'Mobile UI/UX', 'App Store Optimization', 'Push Notifications', 'Mobile Security'],
+      'ai_ml': ['TensorFlow', 'PyTorch', 'Scikit-learn', 'Computer Vision', 'NLP', 'Deep Learning', 'Machine Learning', 'Data Science', 'Neural Networks', 'AI Ethics', 'MLOps', 'Data Mining'],
+      'web3': ['Solidity', 'Smart Contracts', 'Ethereum', 'Web3.js', 'Blockchain', 'DeFi', 'NFTs', 'Crypto Wallets', 'Token Economics', 'Zero Knowledge Proofs', 'Layer 2 Solutions'],
+      'devops': ['AWS', 'Docker', 'Kubernetes', 'CI/CD', 'Git', 'Infrastructure as Code', 'Cloud Architecture', 'Monitoring', 'Security', 'DevSecOps', 'Site Reliability Engineering'],
+      'nocode': ['Bubble', 'Webflow', 'Zapier', 'Airtable', 'Notion', 'Retool', 'Adalo', 'Glide', 'AppSheet', 'Internal Tools'],
+      'data': ['SQL', 'Python', 'R', 'Data Analysis', 'Data Visualization', 'Business Intelligence', 'ETL', 'Data Warehousing', 'Big Data', 'Data Engineering', 'Analytics']
+    }
   },
-  // Add more mock jobs as needed
-];
+  businessSkills: {
+    name: 'Business & Strategy',
+    skills: {
+      'venture_capital': ['Financial Modeling', 'Due Diligence', 'Market Analysis', 'Pitch Deck Creation', 'Term Sheets', 'Cap Table Management', 'Portfolio Management', 'Investment Thesis'],
+      'operations': ['Project Management', 'Process Optimization', 'Team Management', 'Strategic Planning', 'OKRs', 'Resource Allocation', 'Risk Management', 'Change Management'],
+      'finance': ['Financial Analysis', 'Budgeting', 'Forecasting', 'Accounting', 'Fundraising', 'Valuation', 'Unit Economics', 'Financial Planning', 'Treasury Management'],
+      'sales': ['B2B Sales', 'Sales Strategy', 'Lead Generation', 'Account Management', 'Sales Operations', 'CRM Management', 'Pipeline Development', 'Contract Negotiation'],
+      'strategy': ['Business Strategy', 'Go-to-Market', 'Market Research', 'Competitive Analysis', 'Business Development', 'Strategic Partnerships', 'Growth Strategy'],
+      'legal': ['Contract Law', 'IP Law', 'Corporate Law', 'Regulatory Compliance', 'Privacy Law', 'Employment Law', 'Legal Operations']
+    }
+  },
+  marketingSkills: {
+    name: 'Marketing & Growth',
+    skills: {
+      'digital_marketing': ['SEO', 'Content Marketing', 'Email Marketing', 'Social Media Marketing', 'Marketing Analytics', 'Marketing Automation', 'Growth Marketing', 'Conversion Optimization'],
+      'paid_marketing': ['Google Ads', 'Facebook Ads', 'PPC', 'Performance Marketing', 'Media Buying', 'Programmatic Advertising', 'Attribution Modeling', 'Ad Operations'],
+      'content': ['Content Strategy', 'Copywriting', 'Brand Strategy', 'Content Creation', 'Editorial Planning', 'Content Distribution', 'Storytelling', 'Technical Writing'],
+      'community': ['Community Management', 'Discord', 'Social Media Management', 'Community Building', 'Moderation', 'Event Planning', 'User Engagement', 'Ambassador Programs'],
+      'brand': ['Brand Strategy', 'Brand Identity', 'Brand Guidelines', 'Brand Voice', 'Brand Marketing', 'Brand Partnerships', 'Reputation Management'],
+      'analytics': ['Web Analytics', 'Marketing Analytics', 'Data Analysis', 'A/B Testing', 'User Research', 'Attribution Modeling', 'Reporting', 'Dashboard Creation']
+    }
+  },
+  productSkills: {
+    name: 'Product & Design',
+    skills: {
+      'design': ['UI Design', 'UX Design', 'Figma', 'Adobe XD', 'Product Design', 'Design Systems', 'Interaction Design', 'Visual Design', 'Prototyping', 'User Testing'],
+      'product': ['Product Management', 'Product Strategy', 'User Research', 'Agile', 'Product Analytics', 'Feature Prioritization', 'Product Marketing', 'Product Operations'],
+      'graphic_design': ['Graphic Design', 'Brand Design', 'Visual Design', 'Logo Design', 'Typography', 'Color Theory', 'Print Design', 'Digital Design'],
+      'research': ['User Research', 'Market Research', 'Usability Testing', 'Customer Interviews', 'Data Analysis', 'Research Synthesis', 'Journey Mapping'],
+      'ux_writing': ['UX Writing', 'Content Design', 'Information Architecture', 'Content Strategy', 'Microcopy', 'Documentation', 'Style Guides']
+    }
+  },
+  hardSkills: {
+    name: 'Hard Skills',
+    skills: {
+      'analytics': ['SQL', 'Python', 'R', 'Excel', 'Tableau', 'Power BI', 'Data Visualization', 'Statistical Analysis'],
+      'tools': ['Jira', 'Confluence', 'Notion', 'Asana', 'Monday.com', 'Slack', 'G Suite', 'Microsoft Office'],
+      'languages': ['English', 'Spanish', 'Mandarin', 'Hindi', 'Arabic', 'French', 'German', 'Japanese'],
+      'certifications': ['PMP', 'Scrum Master', 'AWS Certified', 'CFA', 'Six Sigma', 'CISSP', 'Google Analytics']
+    }
+  },
+  softSkills: {
+    name: 'Soft Skills',
+    skills: {
+      'leadership': ['Team Leadership', 'Mentoring', 'Decision Making', 'Strategic Thinking', 'Conflict Resolution', 'Change Management'],
+      'communication': ['Public Speaking', 'Written Communication', 'Presentation Skills', 'Negotiation', 'Cross-cultural Communication'],
+      'collaboration': ['Team Collaboration', 'Cross-functional Leadership', 'Stakeholder Management', 'Remote Work', 'Cultural Awareness'],
+      'personal': ['Problem Solving', 'Critical Thinking', 'Time Management', 'Adaptability', 'Creativity', 'Emotional Intelligence']
+    }
+  }
+};
+
+// Helper function to get all available skills as a flat array
+const getAllSkills = () => {
+  const allSkills: string[] = [];
+  Object.values(skillCategoriesData).forEach((category) => {
+    Object.values(category.skills).forEach((skillArray) => {
+      allSkills.push(...skillArray);
+    });
+  });
+  return Array.from(new Set(allSkills)).sort();
+};
+
+// Helper function to find skill categories for a given skill
+const findSkillCategories = (skill: string): string[] => {
+  const categories: string[] = [];
+  Object.entries(skillCategoriesData).forEach(([categoryKey, category]) => {
+    Object.values(category.skills).forEach(skillSet => {
+      if (skillSet.includes(skill)) {
+        categories.push(categoryKey);
+      }
+    });
+  });
+  return categories;
+};
+
+// Type for job data
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  hoursPerWeek: string;
+  description: string;
+  detailedDescription: string;
+  skills: string[];
+  skillCategories: string[];
+  postedDate: string;
+  applicationFormUrl: string;
+  compensation?: string;
+  companySize: string;
+  companyStage: string;
+  timeCommitment: string;
+}
 
 const filters = {
   // Technical Skills categories
@@ -130,27 +215,39 @@ const filters = {
   compensation: ['Paid', 'Equity', 'Unpaid'],
 };
 
-// Group filter categories for the UI
+// Updated filter groups with standardized skills
 const filterGroups = [
   {
     name: 'Technical Skills',
     key: 'technicalSkills',
-    options: filters.technicalSkills
+    subgroups: Object.entries(skillCategoriesData.technicalSkills.skills).map(([key, skills]) => ({
+      name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      skills: skills
+    }))
   },
   {
     name: 'Business & Strategy',
     key: 'businessSkills',
-    options: filters.businessSkills
+    subgroups: Object.entries(skillCategoriesData.businessSkills.skills).map(([key, skills]) => ({
+      name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      skills: skills
+    }))
   },
   {
     name: 'Marketing & Growth',
     key: 'marketingSkills',
-    options: filters.marketingSkills
+    subgroups: Object.entries(skillCategoriesData.marketingSkills.skills).map(([key, skills]) => ({
+      name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      skills: skills
+    }))
   },
   {
     name: 'Product & Design',
     key: 'productSkills',
-    options: filters.productSkills
+    subgroups: Object.entries(skillCategoriesData.productSkills.skills).map(([key, skills]) => ({
+      name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      skills: skills
+    }))
   },
   {
     name: 'Industry',
@@ -179,196 +276,310 @@ const filterGroups = [
   }
 ];
 
+// Helper function to get popular skills based on job listings
+const getPopularSkills = (jobs: Job[]): { skill: string; count: number }[] => {
+  const skillCount = new Map<string, number>();
+  jobs.forEach(job => {
+    job.skills.forEach(skill => {
+      skillCount.set(skill, (skillCount.get(skill) || 0) + 1);
+    });
+  });
+  return Array.from(skillCount.entries())
+    .map(([skill, count]) => ({ skill, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+};
+
+// Smart skill matching algorithm
+const matchSkill = (query: string, skills: string[]): string[] => {
+  const normalizedQuery = query.toLowerCase();
+  return skills
+    .filter(skill => {
+      const normalizedSkill = skill.toLowerCase();
+      // Exact match gets highest priority
+      if (normalizedSkill === normalizedQuery) return true;
+      // Start of word match gets second priority
+      if (normalizedSkill.startsWith(normalizedQuery)) return true;
+      // Contains match gets third priority
+      if (normalizedSkill.includes(normalizedQuery)) return true;
+      // Acronym match gets fourth priority
+      const acronym = skill
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toLowerCase();
+      if (acronym.includes(normalizedQuery)) return true;
+      return false;
+    })
+    .sort((a, b) => {
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+      // Sort exact matches first
+      if (aLower === normalizedQuery) return -1;
+      if (bLower === normalizedQuery) return 1;
+      // Then sort by starts with
+      if (aLower.startsWith(normalizedQuery) && !bLower.startsWith(normalizedQuery)) return -1;
+      if (!aLower.startsWith(normalizedQuery) && bLower.startsWith(normalizedQuery)) return 1;
+      // Then sort alphabetically
+      return a.localeCompare(b);
+    });
+};
+
+// Helper function to get page numbers
+const getPageNumbers = (totalPages: number, currentPage: number) => {
+  const pageNumbers: number[] = [];
+  const maxVisiblePages = 5;
+
+  if (totalPages <= maxVisiblePages) {
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+  } else {
+    if (currentPage <= 3) {
+      for (let i = 1; i <= maxVisiblePages; i++) {
+        pageNumbers.push(i);
+      }
+    } else if (currentPage >= totalPages - 2) {
+      for (let i = totalPages - maxVisiblePages + 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+        pageNumbers.push(i);
+      }
+    }
+  }
+
+  return pageNumbers;
+};
+
 export default function JobsPage() {
-  return (
-    <ProtectedRoute>
-      <Jobs />
-    </ProtectedRoute>
-  );
-}
-
-function Jobs() {
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [expandedJobId, setExpandedJobId] = useState<number | null>(null);
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
+  const [selectedSkills, setSelectedSkills] = useState<Set<string>>(new Set());
+  const [skillQuery, setSkillQuery] = useState('');
 
-  const toggleJobExpansion = (jobId: number) => {
+  const allSkills = useMemo(() => getAllSkills(), []);
+  const filteredSkills = useMemo(() => {
+    return skillQuery === '' ? [] : allSkills.filter(skill => 
+      skill.toLowerCase().includes(skillQuery.toLowerCase())
+    );
+  }, [skillQuery, allSkills]);
+
+  const toggleJobExpansion = (jobId: string) => {
     setExpandedJobId(expandedJobId === jobId ? null : jobId);
   };
 
+  const toggleSkill = (skill: string) => {
+    const newSelectedSkills = new Set(selectedSkills);
+    if (newSelectedSkills.has(skill)) {
+      newSelectedSkills.delete(skill);
+    } else {
+      newSelectedSkills.add(skill);
+    }
+    setSelectedSkills(newSelectedSkills);
+  };
+
+  // Filter jobs based on selected skills and search query
+  const filteredJobs = useMemo(() => {
+    return mockJobs.filter(job => {
+      // Filter by search query
+      const searchMatch = searchQuery === '' || 
+        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Filter by selected skills - job must match ALL selected skills
+      const skillsMatch = selectedSkills.size === 0 ||
+        Array.from(selectedSkills).every(selectedSkill => 
+          job.skills.includes(selectedSkill)
+        );
+
+      return searchMatch && skillsMatch;
+    });
+  }, [searchQuery, selectedSkills]);
+
+  // Pagination
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentJobs = filteredJobs.slice(startIndex, endIndex);
+
   return (
     <DashboardLayout>
-      <div className="content-header">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Jobs Board
-            </h1>
-            <p className="mt-2.5 text-lg text-gray-600">
-              Find exciting opportunities at innovative startups
-            </p>
-          </div>
-          <Link
-            href="/jobs/manage"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Create/Manage Jobs
-          </Link>
-        </div>
-      </div>
-
-      {/* Search and Filter Section */}
-      <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-        <div className="flex flex-col sm:flex-row gap-5">
-          <div className="flex-1">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-12 pr-5 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-gray-200 focus:border-gray-400 transition-all duration-200 text-sm"
-                placeholder="Search jobs by title, company, or skills"
-              />
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Jobs</h1>
+              <p className="mt-2 text-sm text-gray-600">
+                Find exciting opportunities at innovative startups
+              </p>
+            </div>
+            <div className="flex space-x-4">
+              <Link
+                href="/jobs/manage"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Manage Jobs
+              </Link>
+              <Link
+                href="/jobs/create"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Create Job
+              </Link>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowFilters(!showFilters)}
-            className="inline-flex items-center px-4 py-3 border rounded-lg text-sm font-medium transition-all duration-200 bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-          >
-            <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-400 mr-2.5" />
-            Filters
-          </button>
-        </div>
-        
-        {/* Expandable Filters */}
-        {showFilters && (
-          <div className="mt-5 pt-5 border-t border-gray-100 animate-fadeIn">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterGroups.map((group) => (
-                <div key={group.name} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">{group.name}</h3>
-                  <div className="max-h-40 overflow-y-auto pr-2 space-y-2">
-                    {group.options.map((option) => (
-                      <div key={option} className="flex items-center">
-                        <input
-                          id={`${group.key}-${option}`}
-                          name={group.key}
-                          type="checkbox"
-                          className="h-4 w-4 text-black focus:ring-gray-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor={`${group.key}-${option}`} className="ml-2 text-sm text-gray-600 truncate" title={option}>
-                          {option}
-                        </label>
-                      </div>
-                    ))}
+
+          {/* Search and filters section */}
+          <div className="mb-8">
+            <div className="flex items-center space-x-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search jobs by title or company..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                   </div>
                 </div>
-              ))}
-            </div>
-            
-            <div className="mt-5 flex justify-end">
-              <button type="button" className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 mr-3">
-                Apply Filters
-              </button>
-              <button type="button" className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-600 hover:bg-gray-50">
-                Clear All Filters
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <FunnelIcon className="h-5 w-5 mr-2 text-gray-400" />
+                Filters
               </button>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Jobs List */}
-      <div className="mt-8 space-y-6">
-        {mockJobs.map((job) => (
-          <div
-            key={job.id}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md"
-          >
-            <div className="p-8">
-              <div className="flex items-start">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {job.title}
-                      </h3>
-                      <div className="mt-1">
-                        <span className="text-sm font-medium text-gray-900">
-                          {job.company}
-                        </span>
-                        <span className="mx-2 text-gray-500">•</span>
-                        <span className="text-sm flex items-center text-gray-500">
-                          <MapPinIcon className="h-3.5 w-3.5 mr-1" />
-                          {job.location}
-                        </span>
+          {/* Job listings */}
+          <div className="space-y-6">
+            {filteredJobs.map((job) => (
+              <div
+                key={job.id}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex justify-between">
+                        <h2 className="text-xl font-semibold text-gray-900">
+                          {job.title}
+                        </h2>
+                        <time className="text-sm text-gray-500">
+                          {new Date(job.postedDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </time>
+                      </div>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {job.company} • {job.location}
+                      </p>
+                      <div className="mt-4">
+                        <p className="text-sm text-gray-600">
+                          {expandedJobId === job.id ? job.description : `${job.description.slice(0, 150)}...`}
+                        </p>
+                        <button
+                          onClick={() => setExpandedJobId(expandedJobId === job.id ? null : job.id)}
+                          className="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                        >
+                          {expandedJobId === job.id ? 'Show less' : 'Read more'}
+                        </button>
+                      </div>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {job.skills.slice(0, 5).map((skill) => (
+                          <span
+                            key={skill}
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {job.skills.length > 5 && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            +{job.skills.length - 5} more
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-gray-500">
-                        {job.postedDate}
+                  </div>
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                      <span className="inline-flex items-center">
+                        <ClockIcon className="h-4 w-4 mr-1.5 text-gray-400" />
+                        {job.timeCommitment} • {job.hoursPerWeek}
                       </span>
-                      <button
-                        onClick={() => toggleJobExpansion(job.id)}
-                        className="text-gray-400 hover:text-gray-600"
-                      >
-                        {expandedJobId === job.id ? (
-                          <ChevronUpIcon className="h-5 w-5" />
-                        ) : (
-                          <ChevronDownIcon className="h-5 w-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <div className="flex items-center space-x-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                        <ClockIcon className="h-3.5 w-3.5 mr-1" />
-                        {job.hoursPerWeek}
+                      <span className="inline-flex items-center">
+                        <BuildingOfficeIcon className="h-4 w-4 mr-1.5 text-gray-400" />
+                        {job.companyStage}
                       </span>
-                      {job.compensation && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                          {job.compensation}
-                        </span>
-                      )}
                     </div>
-                  </div>
-                  <p className="mt-2 text-sm text-gray-600">
-                    {expandedJobId === job.id ? job.detailedDescription : job.description}
-                  </p>
-                  <div className="mt-4">
-                    <div className="flex flex-wrap gap-2">
-                      {job.skills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <a
+                    <Link
                       href={job.applicationFormUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       Apply Now
                       <ArrowTopRightOnSquareIcon className="ml-2 h-4 w-4" />
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
+
+          {/* Pagination */}
+          <div className="flex items-center justify-center space-x-2 mt-8 pb-8">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Previous
+            </button>
+
+            {getPageNumbers(totalPages, currentPage).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === pageNum
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {pageNum}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
