@@ -25,7 +25,7 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import EnvelopeIconSvg from '/public/images/envelope.svg';
+import EnvelopeIconSvg from '/public/images/NewEnvelopeFolder.svg';
 
 // Add LinkedIn and X logo imports
 import LinkedInLogo from '/public/images/LinkedIn.png';
@@ -312,17 +312,23 @@ function ProfileModal({ founder, isOpen, onClose }: ProfileModalProps) {
               </div>
               <div className="flex items-center space-x-3">
                 {founder.email && (
-                  <button 
+                  <button
                     onClick={handleCopyEmail}
-                    className="text-gray-400 hover:text-gray-700 transition-colors relative group"
+                    className="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors cursor-pointer"
                     aria-label="Copy Email"
                     title="Copy Email"
                   >
-                    <EnvelopeIcon className="h-5 w-5" />
+                    <Image 
+                      src={EnvelopeIconSvg} 
+                      alt="Email" 
+                      width={20} 
+                      height={20} 
+                      className="w-5 h-5"
+                    />
                     {copiedEmail && (
-                      <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute bg-black text-white text-xs py-1 px-2 rounded shadow-md -mt-8">
                         Copied!
-                      </span>
+                      </div>
                     )}
                   </button>
                 )}
@@ -645,7 +651,13 @@ function CoFounders() {
                         className="text-gray-400 hover:text-gray-600 relative group"
                         title="Copy Email"
                       >
-                        <EnvelopeIcon className="h-4 w-4" />
+                        <Image 
+                          src={EnvelopeIconSvg} 
+                          alt="Email" 
+                          width={20} 
+                          height={20} 
+                          className="w-5 h-5"
+                        />
                         {copiedEmails[founder.id] && (
                           <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
                             Copied!
@@ -949,14 +961,21 @@ function CoFounders() {
                     {founder.email && (
                       <button
                         onClick={() => handleCopyEmail(founder.id, founder.email!)}
-                        className="text-gray-400 hover:text-gray-600 relative group"
+                        className="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors cursor-pointer"
+                        aria-label="Copy Email"
                         title="Copy Email"
                       >
-                        <EnvelopeIcon className="h-4 w-4" />
+                        <Image 
+                          src={EnvelopeIconSvg} 
+                          alt="Email" 
+                          width={20} 
+                          height={20} 
+                          className="w-5 h-5"
+                        />
                         {copiedEmails[founder.id] && (
-                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
+                          <div className="absolute bg-black text-white text-xs py-1 px-2 rounded shadow-md -mt-8">
                             Copied!
-                          </span>
+                          </div>
                         )}
                       </button>
                     )}

@@ -51,27 +51,25 @@ function ManageJobs() {
 
   return (
     <DashboardLayout>
-      <div className="content-header">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/jobs"
-                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <svg className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                </svg>
-                Back
-              </Link>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Manage Jobs
-                </h1>
-                <p className="mt-2.5 text-lg text-gray-600">
-                  Create and manage your job postings
-                </p>
-              </div>
+      <div className="content-header py-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <Link
+              href="/jobs"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <svg className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+              Back
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Manage Jobs
+              </h1>
+              <p className="mt-2 text-lg text-gray-600">
+                Create and manage your job postings
+              </p>
             </div>
           </div>
           <button

@@ -47,9 +47,137 @@ Requirements:
 ];
 
 const filters = {
+  // Technical Skills categories
+  technicalSkills: [
+    'Software Engineering (Frontend, Backend, Full-Stack, Mobile, etc.)',
+    'AI/ML (Machine Learning, Data Science, AI Ops, etc.)',
+    'Web3 & Crypto (Smart Contracts, Blockchain Development, DAOs, etc.)',
+    'Cybersecurity (Penetration Testing, Risk Management, etc.)',
+    'Cloud Computing & DevOps (AWS, Kubernetes, etc.)',
+    'Hardware & Robotics (Embedded Systems, IoT, Robotics, etc.)',
+    'No-Code Development (Bubble, Webflow, Zapier, etc.)'
+  ],
+  // Business & Strategy
+  businessSkills: [
+    'Venture Capital & Investing (Financial modeling, Pitch Decks, Startup Due Diligence, etc.)',
+    'Startup Operations (Go-To-Market, Fundraising, Hiring, etc.)',
+    'Finance & Accounting (Cash Flow Management, Forecasting, etc.)',
+    'Consulting & Strategy (Market Research, Growth Strategies, etc.)',
+    'Business Development & Sales (B2B Sales, Partnerships, etc.)'
+  ],
+  // Marketing & Growth
+  marketingSkills: [
+    'SEO & Content Marketing',
+    'Performance Marketing (Google Ads, Facebook Ads, etc.)',
+    'Social Media Growth & Management',
+    'Brand Strategy & Storytelling',
+    'Community Building (Discord, Reddit, Twitter, etc.)',
+    'Affiliate & Influencer Marketing'
+  ],
+  // Product & Design
+  productSkills: [
+    'UI/UX Design (Figma, Adobe XD, Prototyping, etc.)',
+    'Graphic Design & Branding',
+    'Product Management (Roadmaps, User Research, Agile, etc.)',
+    'No-Code Product Development'
+  ],
+  // Industry categories
+  industry: [
+    'Tech & Software',
+    'AI/ML',
+    'SaaS & Enterprise Tech',
+    'Cybersecurity',
+    'Cloud & Infrastructure',
+    'Web3 & Blockchain',
+    'Finance & Investing',
+    'Venture Capital',
+    'Fintech & Payments',
+    'Crypto & DeFi',
+    'Personal Finance',
+    'Consumer & Media',
+    'Creator Economy',
+    'Social Networks & Marketplaces',
+    'Content & Streaming',
+    'Gaming & Metaverse',
+    'E-commerce & Direct-to-Consumer',
+    'Healthcare & Biotech',
+    'Digital Health & Telemedicine',
+    'Medical Devices',
+    'Biotech Startups',
+    'Climate Tech & Energy',
+    'Renewable Energy',
+    'Sustainable Materials',
+    'Carbon Capture',
+    'EdTech',
+    'Real Estate & PropTech',
+    'Aerospace & Robotics'
+  ],
+  // Hourly Commitment
+  commitment: [
+    'Micro-Internships (5-10 hours/week)',
+    'Part-Time (10-20 hours/week)',
+    'Full-Time (40+ hours/week)',
+    'Freelance / Project-Based'
+  ],
+  // Company Stage
+  companyStage: [
+    'Idea Stage (Pre-Seed)',
+    'Early-Stage Startup (Seed - Series A)',
+    'Growth-Stage Startup (Series B & Beyond)'
+  ],
+  // Original filters
   hoursPerWeek: ['10-20 hours/week', '20-30 hours/week', '30-40 hours/week', '40+ hours/week'],
   compensation: ['Paid', 'Equity', 'Unpaid'],
 };
+
+// Group filter categories for the UI
+const filterGroups = [
+  {
+    name: 'Technical Skills',
+    key: 'technicalSkills',
+    options: filters.technicalSkills
+  },
+  {
+    name: 'Business & Strategy',
+    key: 'businessSkills',
+    options: filters.businessSkills
+  },
+  {
+    name: 'Marketing & Growth',
+    key: 'marketingSkills',
+    options: filters.marketingSkills
+  },
+  {
+    name: 'Product & Design',
+    key: 'productSkills',
+    options: filters.productSkills
+  },
+  {
+    name: 'Industry',
+    key: 'industry',
+    options: filters.industry
+  },
+  {
+    name: 'Commitment',
+    key: 'commitment',
+    options: filters.commitment
+  },
+  {
+    name: 'Company Stage',
+    key: 'companyStage',
+    options: filters.companyStage
+  },
+  {
+    name: 'Hours per Week',
+    key: 'hoursPerWeek',
+    options: filters.hoursPerWeek
+  },
+  {
+    name: 'Compensation',
+    key: 'compensation',
+    options: filters.compensation
+  }
+];
 
 export default function JobsPage() {
   return (
@@ -120,48 +248,34 @@ function Jobs() {
         {/* Expandable Filters */}
         {showFilters && (
           <div className="mt-5 pt-5 border-t border-gray-100 animate-fadeIn">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Hours per Week</h3>
-                <div className="space-y-2">
-                  {filters.hoursPerWeek.map((option) => (
-                    <div key={option} className="flex items-center">
-                      <input
-                        id={`hours-${option}`}
-                        name="hours"
-                        type="checkbox"
-                        className="h-4 w-4 text-black focus:ring-gray-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor={`hours-${option}`} className="ml-2 text-sm text-gray-600">
-                        {option}
-                      </label>
-                    </div>
-                  ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filterGroups.map((group) => (
+                <div key={group.name} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">{group.name}</h3>
+                  <div className="max-h-40 overflow-y-auto pr-2 space-y-2">
+                    {group.options.map((option) => (
+                      <div key={option} className="flex items-center">
+                        <input
+                          id={`${group.key}-${option}`}
+                          name={group.key}
+                          type="checkbox"
+                          className="h-4 w-4 text-black focus:ring-gray-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor={`${group.key}-${option}`} className="ml-2 text-sm text-gray-600 truncate" title={option}>
+                          {option}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Compensation</h3>
-                <div className="space-y-2">
-                  {filters.compensation.map((option) => (
-                    <div key={option} className="flex items-center">
-                      <input
-                        id={`compensation-${option}`}
-                        name="compensation"
-                        type="checkbox"
-                        className="h-4 w-4 text-black focus:ring-gray-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor={`compensation-${option}`} className="ml-2 text-sm text-gray-600">
-                        {option}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
             
             <div className="mt-5 flex justify-end">
-              <button type="button" className="text-sm text-gray-600 hover:text-gray-900">
+              <button type="button" className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 mr-3">
+                Apply Filters
+              </button>
+              <button type="button" className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-600 hover:bg-gray-50">
                 Clear All Filters
               </button>
             </div>
