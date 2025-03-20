@@ -474,13 +474,13 @@ export default function JobsPage() {
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
+                </div>
+                <input
+                  type="text"
               className="block w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
               placeholder="Search jobs by title or company..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
               <button
@@ -490,8 +490,8 @@ export default function JobsPage() {
                 <XMarkIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
               </button>
             )}
-          </div>
-          <button
+            </div>
+            <button
             className={`inline-flex items-center px-4 py-3 border ${
               isFiltersOpen ? "border-black bg-gray-50" : "border-gray-300"
             } rounded-lg text-sm font-medium transition-colors`}
@@ -504,9 +504,9 @@ export default function JobsPage() {
                 {Object.values(selectedFilters).reduce((acc, filters) => acc + filters.length, 0)}
               </span>
             )}
-          </button>
-        </div>
-
+            </button>
+          </div>
+          
         {isFiltersOpen && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 animate-fadeIn">
             <div className="mb-4">
@@ -517,29 +517,29 @@ export default function JobsPage() {
                     <h4 className="font-medium text-gray-900">{group.name}</h4>
                     <div className="space-y-1">
                       {group.options.map((option) => (
-                        <div key={option} className="flex items-center">
-                          <input
+                      <div key={option} className="flex items-center">
+                        <input
                             id={`${group.id}-${option}`}
                             name={`${group.id}-${option}`}
-                            type="checkbox"
+                          type="checkbox"
                             className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
                             checked={selectedFilters[group.id]?.includes(option) || false}
                             onChange={() => toggleFilter(group.id, option)}
-                          />
+                        />
                           <label
                             htmlFor={`${group.id}-${option}`}
                             className="ml-2 text-sm text-gray-700"
                           >
-                            {option}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
+                          {option}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
             <div className="flex justify-between pt-4 border-t border-gray-200">
               <button
                 className="text-sm font-medium text-gray-700 hover:text-gray-900"
@@ -553,8 +553,8 @@ export default function JobsPage() {
               >
                 Apply filters
               </button>
-            </div>
-          </div>
+                  </div>
+                </div>
         )}
 
         <div className="space-y-4">
@@ -581,11 +581,11 @@ export default function JobsPage() {
             </div>
           ) : (
             currentJobs.map((job) => (
-              <div
-                key={job.id}
+            <div
+              key={job.id}
                 className="bg-white rounded-lg border border-gray-200 overflow-hidden transition-all duration-150 hover:shadow-md group"
-              >
-                <div className="p-6">
+            >
+              <div className="p-6">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
                     <div className="flex-grow mb-4 sm:mb-0 sm:mr-8">
                       <div className="flex items-center mb-1">
@@ -615,7 +615,7 @@ export default function JobsPage() {
                             Show less
                             <ChevronUpIcon className="ml-1 h-4 w-4" />
                           </button>
-                        </div>
+                      </div>
                       ) : (
                         <>
                           <p className="text-gray-700 line-clamp-2">{job.description}</p>
@@ -714,7 +714,7 @@ export default function JobsPage() {
                 </React.Fragment>
               ))}
               
-              <button
+          <button
                 className={`relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
                   currentPage === totalPages
                     ? "text-gray-300 cursor-not-allowed"
@@ -725,9 +725,9 @@ export default function JobsPage() {
               >
                 <span className="sr-only">Next</span>
                 <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
-              </button>
+          </button>
             </nav>
-          </div>
+        </div>
         )}
       </div>
     </DashboardLayout>

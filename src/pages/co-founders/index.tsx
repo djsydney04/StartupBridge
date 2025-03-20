@@ -279,162 +279,184 @@ function ProfileModal({ founder, isOpen, onClose }: ProfileModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={onClose}></div>
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center">
+      <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose}></div>
+      
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative z-10 mx-4">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 focus:outline-none transition-colors"
+          aria-label="Close"
+        >
+          <XMarkIcon className="h-6 w-6" />
+        </button>
+
+        {/* Header with profile photo and basic info */}
+        <div className="p-8 pb-6 border-b border-gray-100">
+          <div className="flex items-center">
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-50 shadow-sm">
+              <img
+                src={founder.imageUrl}
+                alt={founder.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="ml-6">
+              <h3 className="text-2xl font-bold text-gray-900">{founder.name}</h3>
+              <p className="text-gray-600 text-lg">{founder.role}</p>
+              <p className="text-gray-500 flex items-center mt-1">
+                <MapPinIcon className="h-4 w-4 mr-1.5 text-gray-400" />
+                {founder.location}
+              </p>
+            </div>
+          </div>
+          
+          {/* Contact options */}
+          <div className="flex mt-6 space-x-3">
+            {founder.email && (
+              <button
+                onClick={handleCopyEmail}
+                className="flex items-center px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors group"
+              >
+                <Image 
+                  src={EnvelopeIconSvg} 
+                  alt="Email" 
+                  width={18} 
+                  height={18} 
+                  className="mr-2"
+                />
+                <span className="text-sm">
+                  {copiedEmail ? 'Email Copied!' : 'Copy Email'}
+                </span>
+              </button>
+            )}
+            {founder.linkedInUrl && (
+              <a
+                href={founder.linkedInUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Image
+                  src={LinkedInLogo}
+                  alt="LinkedIn"
+                  width={18}
+                  height={18}
+                  className="mr-2"
+                />
+                <span className="text-sm">LinkedIn</span>
+              </a>
+            )}
+            {founder.twitterUrl && (
+              <a
+                href={founder.twitterUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Image
+                  src={XLogo}
+                  alt="X"
+                  width={18}
+                  height={18}
+                  className="mr-2"
+                />
+                <span className="text-sm">Twitter</span>
+              </a>
+            )}
+          </div>
         </div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full flex flex-col max-h-[90vh]">
-          <div className="absolute top-0 right-0 pt-4 pr-4 z-10">
-            <button
-              onClick={onClose}
-              className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
-            >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
+        {/* Scrollable content */}
+        <div className="overflow-y-auto p-8 max-h-[calc(90vh-200px)]">
+          <div className="mb-8">
+            <h4 className="text-sm font-medium uppercase tracking-wider text-gray-500 mb-3">About</h4>
+            <p className="text-gray-800 whitespace-pre-line">{founder.about || founder.oneLiner}</p>
           </div>
 
-          {/* Fixed header with profile info */}
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <img
-                  src={founder.imageUrl}
-                  alt={founder.name}
-                  className="h-16 w-16 rounded-full object-cover"
-                />
-                <div className="ml-4">
-                  <h3 className="text-2xl font-bold text-gray-900">{founder.name}</h3>
-                  <p className="text-gray-600">{founder.role}</p>
-                  <p className="text-sm text-gray-500">{founder.location}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                {founder.email && (
-                  <button
-                    onClick={handleCopyEmail}
-                    className="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors cursor-pointer"
-                    aria-label="Copy Email"
-                    title="Copy Email"
-                  >
-                    <Image 
-                      src={EnvelopeIconSvg} 
-                      alt="Email" 
-                      width={20} 
-                      height={20} 
-                      className="w-5 h-5"
-                    />
-                    {copiedEmail && (
-                      <div className="absolute bg-black text-white text-xs py-1 px-2 rounded shadow-md -mt-8">
-                        Copied!
-                      </div>
-                    )}
-                  </button>
-                )}
-                {founder.linkedInUrl && (
-                  <a
-                    href={founder.linkedInUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-gray-700 transition-colors"
-                    title="LinkedIn"
-                  >
-                    <Image
-                      src={LinkedInLogo}
-                      alt="LinkedIn"
-                      width={20}
-                      height={20}
-                    />
-                  </a>
-                )}
-                {founder.twitterUrl && (
-                  <a
-                    href={founder.twitterUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-gray-700 transition-colors"
-                    title="X (Twitter)"
-                  >
-                    <Image
-                      src={XLogo}
-                      alt="X (Twitter)"
-                      width={20}
-                      height={20}
-                    />
-                  </a>
-                )}
-              </div>
+          <div className="mb-8">
+            <h4 className="text-sm font-medium uppercase tracking-wider text-gray-500 mb-3">Skills</h4>
+            <div className="flex flex-wrap gap-2">
+              {founder.skills.map((skill, idx) => (
+                <span key={idx} className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+          
+          <div className="mb-8">
+            <h4 className="text-sm font-medium uppercase tracking-wider text-gray-500 mb-3">Interests</h4>
+            <div className="flex flex-wrap gap-2">
+              {founder.interests.map((interest, idx) => (
+                <span key={idx} className="px-3 py-1.5 bg-gray-50 text-gray-800 rounded-full text-sm font-medium border border-gray-200">
+                  {interest}
+                </span>
+              ))}
             </div>
           </div>
 
-          {/* Scrollable content area */}
-          <div className="bg-white px-4 py-4 sm:px-6 overflow-y-auto flex-1">
-            <div className="mb-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">About</h4>
-              <p className="text-gray-600">{founder.about || founder.oneLiner}</p>
+          {founder.experience && (
+            <div className="mb-8">
+              <h4 className="text-sm font-medium uppercase tracking-wider text-gray-500 mb-3">Experience</h4>
+              <div className="space-y-5">
+                {founder.experience.map((exp, idx) => (
+                  <div key={idx} className="pl-4 border-l-2 border-gray-100">
+                    <h5 className="font-medium text-gray-900">{exp.title}</h5>
+                    <p className="text-gray-700">{exp.company}</p>
+                    <p className="text-gray-500 text-sm">{exp.duration}</p>
+                    <p className="text-gray-600 mt-2 text-sm">{exp.description}</p>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
 
-            <div className="mb-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">Skills</h4>
+          {founder.education && (
+            <div className="mb-8">
+              <h4 className="text-sm font-medium uppercase tracking-wider text-gray-500 mb-3">Education</h4>
+              <div className="space-y-4">
+                {founder.education.map((edu, idx) => (
+                  <div key={idx}>
+                    <h5 className="font-medium text-gray-900">{edu.school}</h5>
+                    <p className="text-gray-700">{edu.degree}</p>
+                    <p className="text-gray-500 text-sm">{edu.year}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <h4 className="text-sm font-medium uppercase tracking-wider text-gray-500 mb-3">Availability</h4>
               <div className="flex flex-wrap gap-2">
-                {founder.skills.map((skill, idx) => (
-                  <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-                    {skill}
+                {founder.availableFor.map((type, idx) => (
+                  <span key={idx} className="px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium">
+                    {type}
                   </span>
                 ))}
               </div>
             </div>
-
-            {founder.experience && (
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">Experience</h4>
-                <div className="space-y-4">
-                  {founder.experience.map((exp, idx) => (
-                    <div key={idx} className="border-l-2 border-gray-200 pl-4">
-                      <h5 className="font-medium text-gray-900">{exp.title}</h5>
-                      <p className="text-sm text-gray-600">{exp.company}</p>
-                      <p className="text-sm text-gray-500">{exp.duration}</p>
-                      <p className="text-sm text-gray-600 mt-1">{exp.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {founder.education && (
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">Education</h4>
-                <div className="space-y-3">
-                  {founder.education.map((edu, idx) => (
-                    <div key={idx}>
-                      <h5 className="font-medium text-gray-900">{edu.school}</h5>
-                      <p className="text-sm text-gray-600">{edu.degree}</p>
-                      <p className="text-sm text-gray-500">{edu.year}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <div>
+              <h4 className="text-sm font-medium uppercase tracking-wider text-gray-500 mb-3">Startup Stage</h4>
+              <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                {founder.stage}
+              </span>
+            </div>
           </div>
+        </div>
 
-          {/* Fixed footer with buttons */}
-          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t">
-            <button
-              type="button"
-              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:ml-3 sm:w-auto sm:text-sm"
-              onClick={() => {/* Add connect functionality */}}
-            >
-              Connect
-            </button>
-            <button
-              type="button"
-              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              onClick={onClose}
-            >
-              Close
-            </button>
-          </div>
+        {/* Footer */}
+        <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end">
+          <button
+            type="button"
+            className="px-6 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+            onClick={onClose}
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -901,68 +923,107 @@ function CoFounders() {
       {filteredFounders.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 mb-11">
           {filteredFounders.map((founder) => (
-            <div
+            <div 
               key={founder.id}
-              className={`bg-white rounded-xl border overflow-hidden transition-all duration-300 hover:shadow-md ${
-                expandedFounder === founder.id 
-                  ? 'border-gray-400 shadow-md scale-102 translate-y-0' 
-                  : 'border-gray-100 hover:border-gray-200'
-              } h-[450px] flex flex-col`}
+              className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
             >
-              <div className="p-6 flex flex-col h-full">
-                {/* Header with profile pic, name, and match score */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start">
-                    <div className="h-14 w-14 rounded-full overflow-hidden border-2 border-gray-100 flex-shrink-0 shadow-sm">
-                      <img
-                        src={founder.imageUrl}
-                        alt={founder.name}
-                        className="h-full w-full object-cover"
-                      />
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex space-x-4">
+                    <div className="relative">
+                      <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-gray-50 shadow-sm">
+                        <img
+                          src={founder.imageUrl}
+                          alt={founder.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      {founder.mutualConnections > 0 && (
+                        <div className="absolute -bottom-1 -right-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-full px-1.5 py-0.5 border border-white shadow-sm">
+                          {founder.mutualConnections} mutual
+                        </div>
+                      )}
                     </div>
-                    <div className="ml-3">
-                      <h3 className="text-base font-semibold text-gray-900 mb-0.5 truncate max-w-[140px]">
-                        {founder.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 truncate max-w-[140px]">{founder.role}</p>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-1">{founder.name}</h3>
+                      <p className="text-gray-600 text-sm">{founder.role}</p>
+                      <p className="text-gray-500 text-sm flex items-center mt-1">
+                        <MapPinIcon className="h-3.5 w-3.5 mr-1 text-gray-400" />
+                        {founder.location}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2 flex-shrink-0">
-                    <span 
-                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                    >
+                  <div className="flex flex-col items-end">
+                    <div className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                      founder.matchScore >= 90 ? 'bg-green-50 text-green-700' :
+                      founder.matchScore >= 80 ? 'bg-blue-50 text-blue-700' :
+                      founder.matchScore >= 70 ? 'bg-purple-50 text-purple-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
                       {founder.matchScore}% Match
-                    </span>
-                    <button
-                      onClick={() => toggleBookmark(founder.id)}
-                      className="text-gray-400 hover:text-black transition-colors duration-150"
+                    </div>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleBookmark(founder.id);
+                      }}
+                      className="mt-2 text-gray-400 hover:text-gray-700"
                       aria-label={founder.isBookmarked ? "Remove bookmark" : "Add bookmark"}
                     >
-                      <BookmarkIcon className={`h-5 w-5 ${founder.isBookmarked ? 'fill-black text-black' : ''}`} />
+                      <BookmarkIcon className={`h-5 w-5 ${founder.isBookmarked ? 'fill-current text-black' : ''}`} />
                     </button>
                   </div>
                 </div>
-                
-                {/* Location & Social Media */}
-                <div className="mt-3 flex items-center justify-between">
-                  <p className="text-xs text-gray-500 flex items-center truncate max-w-[180px]">
-                    <MapPinIcon className="h-3.5 w-3.5 mr-1 text-gray-400 flex-shrink-0" />
-                    <span className="truncate">{founder.location}</span>
-                    {founder.mutualConnections > 0 && (
-                      <span className="ml-3 inline-flex items-center text-gray-600 whitespace-nowrap">
-                        <UserCircleIcon className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-                        {founder.mutualConnections} mutual
-                      </span>
-                    )}
-                  </p>
-                  
-                  {/* Social Media Icons */}
-                  <div className="flex items-center space-x-3">
+
+                <div className="mt-4">
+                  <blockquote className="text-gray-700 italic text-sm border-l-4 border-gray-100 pl-3 mb-4 line-clamp-2">
+                    "{founder.oneLiner}"
+                  </blockquote>
+                </div>
+
+                <div className="flex flex-col space-y-4 mt-4">
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Skills</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {founder.skills.slice(0, 3).map((skill, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-gray-100 text-gray-800 rounded-md text-xs font-medium">
+                          {skill}
+                        </span>
+                      ))}
+                      {founder.skills.length > 3 && (
+                        <span className="px-2.5 py-1 text-gray-500 text-xs font-medium">
+                          +{founder.skills.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Interests</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {founder.interests.slice(0, 3).map((interest, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-xs font-medium">
+                          {interest}
+                        </span>
+                      ))}
+                      {founder.interests.length > 3 && (
+                        <span className="px-2.5 py-1 text-gray-500 text-xs font-medium">
+                          +{founder.interests.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
+                  <div className="flex space-x-3">
                     {founder.email && (
                       <button
-                        onClick={() => handleCopyEmail(founder.id, founder.email!)}
-                        className="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors cursor-pointer"
-                        aria-label="Copy Email"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopyEmail(founder.id, founder.email!);
+                        }}
+                        className="text-gray-400 hover:text-gray-700 relative"
                         title="Copy Email"
                       >
                         <Image 
@@ -973,9 +1034,9 @@ function CoFounders() {
                           className="w-5 h-5"
                         />
                         {copiedEmails[founder.id] && (
-                          <div className="absolute bg-black text-white text-xs py-1 px-2 rounded shadow-md -mt-8">
+                          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
                             Copied!
-                          </div>
+                          </span>
                         )}
                       </button>
                     )}
@@ -984,14 +1045,15 @@ function CoFounders() {
                         href={founder.linkedInUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-gray-400 hover:text-gray-700"
+                        onClick={(e) => e.stopPropagation()}
                         title="LinkedIn"
                       >
                         <Image
                           src={LinkedInLogo}
                           alt="LinkedIn"
-                          width={16}
-                          height={16}
+                          width={18}
+                          height={18}
                         />
                       </a>
                     )}
@@ -1000,118 +1062,26 @@ function CoFounders() {
                         href={founder.twitterUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-gray-400 hover:text-gray-700"
+                        onClick={(e) => e.stopPropagation()}
                         title="X (Twitter)"
                       >
                         <Image
                           src={XLogo}
                           alt="X"
-                          width={16}
-                          height={16}
+                          width={18}
+                          height={18}
                         />
                       </a>
                     )}
                   </div>
-                </div>
-                
-                {/* Mission/One liner with fixed height */}
-                <div className="mt-4 min-h-[48px]">
-                  <p className="text-sm text-gray-700 line-clamp-2">
-                    "{founder.oneLiner}"
-                  </p>
-                </div>
-                
-                {/* Skills with fixed height - limiting to prevent overflow */}
-                <div className="mt-5">
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Skills</h4>
-                  <div className="flex flex-wrap gap-2 max-h-[60px] overflow-y-auto pr-1">
-                    {founder.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 whitespace-nowrap"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Interests with fixed height - limiting to prevent overflow */}
-                <div className="mt-4">
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Interests</h4>
-                  <div className="flex flex-wrap gap-2 max-h-[60px] overflow-y-auto pr-1">
-                    {founder.interests.map((interest) => (
-                      <span
-                        key={interest}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 whitespace-nowrap"
-                      >
-                        {interest}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Additional info when expanded - with fixed height */}
-                {expandedFounder === founder.id && (
-                  <div className="mt-4 pt-3 border-t border-gray-100 animate-fadeIn">
-                    <div className="grid grid-cols-2 gap-4 mb-2">
-                      <div>
-                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Availability</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {founder.availableFor.map((avail) => (
-                            <span
-                              key={avail}
-                              className="inline-flex items-center px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded whitespace-nowrap"
-                            >
-                              {avail}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Stage</h4>
-                        <span className="inline-flex items-center px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded whitespace-nowrap">
-                          {founder.stage}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                      <div className="flex items-center">
-                        <CheckBadgeIcon className="h-4 w-4 text-green-500 mr-1 flex-shrink-0" />
-                        <span>{founder.endorsements} endorsements</span>
-                      </div>
-                      <button 
-                        className="text-black hover:text-gray-700 font-medium"
-                        onClick={() => {
-                          setSelectedFounder(founder);
-                          setIsProfileModalOpen(true);
-                        }}
-                      >
-                        View Full Profile
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Action buttons - placed at mt-auto to always stay at the bottom */}
-                <div className="mt-auto pt-2 grid grid-cols-2 gap-3">
                   <button
-                    type="button"
-                    className="inline-flex items-center justify-center px-3 py-2.5 border border-gray-900 text-sm font-medium rounded-lg text-gray-900 bg-white hover:bg-gray-50 transition-colors duration-200"
-                    onClick={() => setExpandedFounder(expandedFounder === founder.id ? null : founder.id)}
-                  >
-                    {expandedFounder === founder.id ? 'Show Less' : 'See More'}
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center px-3 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-black hover:bg-gray-800 shadow-sm transition-colors duration-200"
+                    className="inline-flex items-center px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
                     onClick={() => {
                       setSelectedFounder(founder);
                       setIsProfileModalOpen(true);
                     }}
                   >
-                    <UserPlusIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                     See Profile
                   </button>
                 </div>
