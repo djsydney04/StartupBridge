@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Combobox, Transition } from '@headlessui/react';
 import { skillCategories } from '@/utils/skillCategories';
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ChevronUpIcon, ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Poppins } from 'next/font/google';
+import { useRouter } from 'next/router';
 
 interface FormData {
   title: string;
@@ -148,6 +149,9 @@ export default function CreateJobPage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [skillQuery, setSkillQuery] = useState('');
   const [isReviewing, setIsReviewing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
+  const router = useRouter();
 
   const handleInputChange = (value: string | string[]) => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -198,6 +202,23 @@ export default function CreateJobPage() {
     : getAllSkills().filter(skill => 
         skill.toLowerCase().includes(skillQuery.toLowerCase())
       );
+
+  const handlePublishJob = async () => {
+    setIsSubmitting(true);
+    
+    // Simulate API call with a delay
+    setTimeout(() => {
+      // In a real implementation, you would send the form data to your API
+      console.log('Publishing job:', formData);
+      
+      // Mark as success and redirect after a moment
+      setIsSubmitSuccess(true);
+      
+      setTimeout(() => {
+        router.push('/jobs/manage');
+      }, 2000);
+    }, 1000);
+  };
 
   const renderQuestion = () => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -448,10 +469,10 @@ export default function CreateJobPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-3xl mx-auto pt-24"
+        className="max-w-3xl mx-auto pt-24 pb-12 px-4 sm:px-6"
       >
-        <div className="mb-12 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-4">
+        <div className="mb-10 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-50 text-green-500 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -460,103 +481,139 @@ export default function CreateJobPage() {
           <p className="text-gray-500">Make sure everything looks good before publishing</p>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-8 space-y-8">
-            <div>
-              <h3 className={`text-2xl font-semibold text-gray-900 ${poppins.className}`}>{formData.title}</h3>
-              <p className="mt-2 text-gray-500 flex items-center">
-                <span className="font-medium text-gray-900">{formData.company}</span>
-                <span className="mx-2">•</span>
-                <span>{formData.location}</span>
-              </p>
+        {isSubmitSuccess ? (
+          <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200 px-6">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-4">
+              <CheckIcon className="h-8 w-8" />
             </div>
-
-            <div className="space-y-6">
+            <h3 className={`text-2xl font-semibold mb-2 text-gray-900 ${poppins.className}`}>Job Posted Successfully!</h3>
+            <p className="text-gray-500 mb-8">Your job has been published and is now live.</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/jobs"
+                className="inline-flex justify-center items-center px-5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              >
+                View All Jobs
+              </Link>
+              <Link
+                href="/jobs/manage"
+                className="inline-flex justify-center items-center px-5 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800"
+              >
+                Manage Your Jobs
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-8 space-y-8">
               <div>
-                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Description</h4>
-                <p className="text-gray-800 whitespace-pre-line">{formData.description}</p>
+                <h3 className={`text-2xl font-semibold text-gray-900 ${poppins.className}`}>{formData.title || 'Untitled Position'}</h3>
+                <p className="mt-2 text-gray-500 flex items-center">
+                  <span className="font-medium text-gray-900">{formData.company || 'Your Company'}</span>
+                  {formData.location && (
+                    <>
+                      <span className="mx-2">•</span>
+                      <span>{formData.location}</span>
+                    </>
+                  )}
+                </p>
               </div>
 
-              <div>
-                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Required Skills</h4>
-                <div className="flex flex-wrap gap-2">
-                  {formData.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Time Commitment</h4>
-                  <p className="text-gray-900 font-medium">{formData.timeCommitment}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Hours per Week</h4>
-                  <p className="text-gray-900 font-medium">{formData.hoursPerWeek}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Company Stage</h4>
-                  <p className="text-gray-900 font-medium">{formData.companyStage}</p>
-                </div>
-              </div>
-              
-              {(formData.companyWebsite || formData.companyLinkedIn || formData.companySocial) && (
+              <div className="space-y-6">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Company Links</h4>
-                  <div className="space-y-2">
-                    {formData.companyWebsite && (
-                      <p className="text-gray-800 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                        </svg>
-                        {formData.companyWebsite}
-                      </p>
-                    )}
-                    {formData.companyLinkedIn && (
-                      <p className="text-gray-800 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                        </svg>
-                        {formData.companyLinkedIn}
-                      </p>
-                    )}
-                    {formData.companySocial && (
-                      <p className="text-gray-800 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.066 9.645c.183 4.04-2.83 8.544-8.164 8.544-1.622 0-3.131-.476-4.402-1.291 1.524.18 3.045-.244 4.252-1.189-1.256-.023-2.317-.854-2.684-1.995.451.086.895.061 1.298-.049-1.381-.278-2.335-1.522-2.304-2.853.388.215.83.344 1.301.359-1.279-.855-1.641-2.544-.889-3.835 1.416 1.738 3.533 2.881 5.92 3.001-.419-1.796.944-3.527 2.799-3.527.825 0 1.572.349 2.096.907.654-.128 1.27-.368 1.824-.697-.215.671-.67 1.233-1.263 1.589.581-.07 1.135-.224 1.649-.453-.384.578-.87 1.084-1.433 1.489z"/>
-                        </svg>
-                        {formData.companySocial}
-                      </p>
-                    )}
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Description</h4>
+                  <p className="text-gray-800 whitespace-pre-line">{formData.description || 'No description provided'}</p>
+                </div>
+
+                {formData.skills.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Required Skills</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.skills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Time Commitment</h4>
+                    <p className="text-gray-900 font-medium">{formData.timeCommitment || 'Not specified'}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Hours per Week</h4>
+                    <p className="text-gray-900 font-medium">{formData.hoursPerWeek || 'Not specified'}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Company Stage</h4>
+                    <p className="text-gray-900 font-medium">{formData.companyStage || 'Not specified'}</p>
                   </div>
                 </div>
-              )}
+                
+                {(formData.companyWebsite || formData.companyLinkedIn || formData.companySocial) && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Company Links</h4>
+                    <div className="space-y-2">
+                      {formData.companyWebsite && (
+                        <p className="text-gray-800 flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                          </svg>
+                          {formData.companyWebsite}
+                        </p>
+                      )}
+                      {formData.companyLinkedIn && (
+                        <p className="text-gray-800 flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                          </svg>
+                          {formData.companyLinkedIn}
+                        </p>
+                      )}
+                      {formData.companySocial && (
+                        <p className="text-gray-800 flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.066 9.645c.183 4.04-2.83 8.544-8.164 8.544-1.622 0-3.131-.476-4.402-1.291 1.524.18 3.045-.244 4.252-1.189-1.256-.023-2.317-.854-2.684-1.995.451.086.895.061 1.298-.049-1.381-.278-2.335-1.522-2.304-2.853.388.215.83.344 1.301.359-1.279-.855-1.641-2.544-.889-3.835 1.416 1.738 3.533 2.881 5.92 3.001-.419-1.796.944-3.527 2.799-3.527.825 0 1.572.349 2.096.907.654-.128 1.27-.368 1.824-.697-.215.671-.67 1.233-1.263 1.589.581-.07 1.135-.224 1.649-.453-.384.578-.87 1.084-1.433 1.489z"/>
+                          </svg>
+                          {formData.companySocial}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="px-8 py-6 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => setIsReviewing(false)}
+                className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Edit Details
+              </button>
+              
+              <button
+                type="button"
+                onClick={handlePublishJob}
+                disabled={isSubmitting}
+                className={`px-8 py-3 text-sm font-medium text-white bg-black rounded-lg ${
+                  isSubmitting 
+                    ? 'opacity-75 cursor-not-allowed' 
+                    : 'hover:bg-gray-800 shadow-sm hover:shadow'
+                }`}
+              >
+                {isSubmitting ? 'Publishing...' : 'Publish Job'}
+              </button>
             </div>
           </div>
-          
-          <div className="px-8 py-6 bg-gray-50 border-t border-gray-200 flex justify-between">
-            <button
-              type="button"
-              onClick={() => setIsReviewing(false)}
-              className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Edit Details
-            </button>
-            
-            <button
-              type="button"
-              className="px-8 py-3 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 shadow-sm"
-            >
-              Publish Job
-            </button>
-          </div>
-        </div>
+        )}
       </motion.div>
     );
   };
