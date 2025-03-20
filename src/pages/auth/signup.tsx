@@ -379,44 +379,54 @@ export default function SignUp() {
     setError('');
     
     try {
-      /* Commented for MVP
+      // Collect all profile information from form
+      const completeProfileData = {
+        full_name: formData.basicInfo.fullName,
+        university: 'Chapman University',
+        major: formData.basicInfo.major,
+        year: formData.basicInfo.year,
+        skills: formData.basicInfo.skills.split(',').map(i => i.trim()).filter(Boolean),
+        interests: formData.basicInfo.interests.split(',').map(i => i.trim()).filter(Boolean),
+        linkedin_url: formData.basicInfo.linkedinUrl,
+        twitter_url: formData.basicInfo.xUrl
+      };
+      
+      // Sign up with email, password, and complete profile data
       const result = await signUp(
         formData.basicInfo.email, 
         formData.basicInfo.password,
-        {
-          full_name: formData.basicInfo.fullName,
-          // Add other metadata here
-        }
+        completeProfileData
       );
       
       if (result.success) {
-        // Create profile after successful signup
-        const profileData = {
-          university: 'Chapman University',
-          full_name: formData.basicInfo.fullName,
+        // Save questionnaire data to localStorage for profile completion
+        const questionnaireData = {
+          name: formData.basicInfo.fullName,
+          skills: formData.basicInfo.skills,
           major: formData.basicInfo.major,
           year: formData.basicInfo.year,
-          interests: formData.basicInfo.interests.split(',').map(i => i.trim()),
-          skills: formData.basicInfo.skills.split(',').map(i => i.trim()),
+          interests: formData.basicInfo.interests,
           linkedin_url: formData.basicInfo.linkedinUrl,
           twitter_url: formData.basicInfo.xUrl
         };
         
-        await createProfile(profileData);
+        try {
+          localStorage.setItem('founderConnectQuestionnaire', JSON.stringify(questionnaireData));
+        } catch (e) {
+          console.error('Error saving questionnaire data:', e);
+        }
         
-        router.push('/auth/signin?registered=true');
+        // Show registration completed screen for 2 seconds
+        setRegistrationCompleted(true);
+        
+        // Redirect to sign in page after 2 seconds
+        setTimeout(() => {
+          router.push('/auth/signin?registered=true');
+        }, 2000);
       } else {
         setError(result.error || 'Failed to create account');
+        setIsLoading(false);
       }
-      */
-      
-      // Show registration completed screen for 2 seconds
-      setRegistrationCompleted(true);
-      
-      // Redirect to dashboard page after 2 seconds
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
       setIsLoading(false);

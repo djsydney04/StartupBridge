@@ -660,18 +660,21 @@ export const getCurrentUser = async () => {
 /**
  * Sign up a new user
  */
-export const signUp = async (email: string, password: string, userData?: { full_name?: string }) => {
+export const signUp = async (email: string, password: string, profileData?: Partial<Profile>) => {
   try {
-    console.log('Creating new user with email:', email);
+    console.log('Creating new user with email:', email, 'and profile data:', profileData);
+    
+    // Prepare the userData for auth.signUp
+    const userData = {
+      full_name: profileData?.full_name || ''
+    };
     
     // First register the user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: {
-          full_name: userData?.full_name || ''
-        }
+        data: userData
       }
     });
     
@@ -686,52 +689,156 @@ export const signUp = async (email: string, password: string, userData?: { full_
     
     console.log('User created successfully in Auth:', data.user);
     
-    // Wait a short moment to ensure auth is completed
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Wait a moment for auth to be fully registered
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    // Explicitly add the user to the users table with a direct insert
+    // Create user in users table - using RLS policies
+    let userInsertSuccess = false;
     try {
-      const { error: userInsertError } = await supabase
+      // Add record to users table
+      const userInsertResponse = await supabase
         .from('users')
-        .insert([{
+        .insert({
           id: data.user.id,
           email: email,
           created_at: new Date().toISOString(),
-          full_name: userData?.full_name || '',
-        }]);
+          full_name: profileData?.full_name || ''
+        })
+        .select();
       
-      if (userInsertError) {
-        console.error('Error adding user to users table:', userInsertError);
+      if (userInsertResponse.error) {
+        console.error('Error inserting user record:', userInsertResponse.error);
+        
+        // Try an upsert as fallback
+        const userUpsertResponse = await supabase
+          .from('users')
+          .upsert({
+            id: data.user.id,
+            email: email,
+            created_at: new Date().toISOString(),
+            full_name: profileData?.full_name || ''
+          })
+          .select();
+          
+        if (userUpsertResponse.error) {
+          console.error('Error upserting user record:', userUpsertResponse.error);
+        } else {
+          console.log('User record upserted successfully:', userUpsertResponse.data);
+          userInsertSuccess = true;
+        }
       } else {
-        console.log('User added to users table successfully');
+        console.log('User record created successfully:', userInsertResponse.data);
+        userInsertSuccess = true;
       }
     } catch (userError) {
-      console.error('Exception adding user to users table:', userError);
+      console.error('Exception creating user record:', userError);
     }
     
-    // Create a profile for the new user with direct insert
-    try {
-      const { error: profileInsertError } = await supabase
-        .from('profiles')
-        .insert([{
+    if (!userInsertSuccess) {
+      console.warn('Failed to create user record in users table, attempting direct SQL');
+      try {
+        // Try a direct SQL insert as a last resort
+        const { error: sqlError } = await supabase.rpc('insert_user', {
           user_id: data.user.id,
-          university: 'Chapman University',
-          full_name: userData?.full_name || '',
-          created_at: new Date().toISOString(),
-          skills: [],
-          interests: []
-        }]);
-      
-      if (profileInsertError) {
-        console.error('Error inserting profile directly:', profileInsertError);
-      } else {
-        console.log('Profile inserted directly successfully');
+          user_email: email,
+          user_fullname: profileData?.full_name || ''
+        });
+        
+        if (sqlError) {
+          console.error('SQL insert user error:', sqlError);
+        } else {
+          console.log('User inserted via SQL function');
+          userInsertSuccess = true;
+        }
+      } catch (sqlError) {
+        console.error('Exception during SQL user insert:', sqlError);
       }
-    } catch (profileInsertError) {
-      console.error('Exception inserting profile directly:', profileInsertError);
     }
     
-    return { success: true, user: data.user };
+    // Create profile for user - will try multiple methods for reliability
+    let profileInsertSuccess = false;
+    
+    // Prepare complete profile data
+    const completeProfileData = {
+      user_id: data.user.id,
+      university: profileData?.university || 'Chapman University',
+      full_name: profileData?.full_name || '',
+      major: profileData?.major || '',
+      year: profileData?.year || '',
+      skills: profileData?.skills || [],
+      interests: profileData?.interests || [],
+      linkedin_url: profileData?.linkedin_url || '',
+      twitter_url: profileData?.twitter_url || '',
+      created_at: new Date().toISOString()
+    };
+    
+    // Try method 1: direct profile insert
+    try {
+      const profileInsertResponse = await supabase
+        .from('profiles')
+        .insert(completeProfileData)
+        .select();
+      
+      if (profileInsertResponse.error) {
+        console.error('Error inserting profile directly:', profileInsertResponse.error);
+      } else {
+        console.log('Profile created successfully via direct insert:', profileInsertResponse.data);
+        profileInsertSuccess = true;
+      }
+    } catch (profileError) {
+      console.error('Exception inserting profile directly:', profileError);
+    }
+    
+    // Try method 2: upsert method if insert failed
+    if (!profileInsertSuccess) {
+      try {
+        const profileUpsertResponse = await supabase
+          .from('profiles')
+          .upsert(completeProfileData)
+          .select();
+        
+        if (profileUpsertResponse.error) {
+          console.error('Error upserting profile:', profileUpsertResponse.error);
+        } else {
+          console.log('Profile upserted successfully:', profileUpsertResponse.data);
+          profileInsertSuccess = true;
+        }
+      } catch (upsertError) {
+        console.error('Exception upserting profile:', upsertError);
+      }
+    }
+    
+    // Try method 3: RPC function if all else failed
+    if (!profileInsertSuccess) {
+      try {
+        const { error: rpcError } = await supabase.rpc('create_profile', {
+          profile_user_id: data.user.id,
+          profile_fullname: profileData?.full_name || '',
+          profile_data: JSON.stringify(completeProfileData)
+        });
+        
+        if (rpcError) {
+          console.error('Error creating profile via RPC:', rpcError);
+        } else {
+          console.log('Profile created via RPC function');
+          profileInsertSuccess = true;
+        }
+      } catch (rpcError) {
+        console.error('Exception creating profile via RPC:', rpcError);
+      }
+    }
+    
+    // If we couldn't create profile, log warning but allow signup to complete
+    if (!profileInsertSuccess) {
+      console.warn('Failed to create profile after multiple attempts. User will need to create profile later.');
+    }
+    
+    return { 
+      success: true, 
+      user: data.user, 
+      userTableSuccess: userInsertSuccess,
+      profileSuccess: profileInsertSuccess
+    };
   } catch (error: any) {
     console.error('Unexpected error during sign up:', error);
     return { success: false, error: error.message || 'An unexpected error occurred' };
