@@ -416,9 +416,9 @@ export default function JobsPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Jobs</h1>
               <p className="mt-2 text-sm text-gray-600">
-                Find exciting opportunities at innovative startups
-              </p>
-            </div>
+            Find exciting opportunities at innovative startups
+          </p>
+        </div>
             <div className="flex space-x-4">
               <Link
                 href="/jobs/manage"
@@ -434,13 +434,13 @@ export default function JobsPage() {
               </Link>
             </div>
           </div>
-
+          
           {/* Search and filters section */}
           <div className="mb-8">
             <div className="flex items-center space-x-4">
               <div className="flex-1">
                 <div className="relative">
-                  <input
+                        <input
                     type="text"
                     placeholder="Search jobs by title or company..."
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -459,18 +459,18 @@ export default function JobsPage() {
               >
                 <FunnelIcon className="h-5 w-5 mr-2 text-gray-400" />
                 Filters
-              </button>
-            </div>
-          </div>
+                </button>
+              </div>
+        </div>
 
           {/* Job listings */}
           <div className="space-y-6">
             {filteredJobs.map((job) => (
-              <div
-                key={job.id}
+            <div
+              key={job.id}
                 className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="p-6">
+            >
+              <div className="p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex justify-between">
@@ -533,12 +533,12 @@ export default function JobsPage() {
                       Apply Now
                       <ArrowTopRightOnSquareIcon className="ml-2 h-4 w-4" />
                     </Link>
-                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-
+            </div>
+          ))}
+        </div>
+        
           {/* Pagination */}
           <div className="flex items-center justify-center space-x-2 mt-8 pb-8">
             <button
@@ -567,7 +567,7 @@ export default function JobsPage() {
               </button>
             ))}
 
-            <button
+          <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
               className={`px-3 py-1 rounded-md ${
@@ -577,7 +577,7 @@ export default function JobsPage() {
               }`}
             >
               Next
-            </button>
+          </button>
           </div>
         </div>
       </div>

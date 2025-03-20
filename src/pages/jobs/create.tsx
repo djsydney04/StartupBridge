@@ -206,7 +206,7 @@ export default function CreateJobPage() {
     return (
       <div className="min-h-screen bg-white">
         <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-10">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <Link
                 href="/jobs"
@@ -220,7 +220,7 @@ export default function CreateJobPage() {
             </div>
             <div className="mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
               <div
-                className="h-1 bg-indigo-600 transition-all duration-500"
+                className="h-1 bg-black transition-all duration-500"
                 style={{
                   width: `${isReviewing ? 100 : ((currentQuestionIndex + 1) / questions.length) * 100}%`
                 }}
@@ -229,161 +229,216 @@ export default function CreateJobPage() {
           </div>
         </div>
 
-        <motion.div
-          key={currentQuestion.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16"
-        >
-          <div className="max-w-none">
-            <h2 className={`text-4xl font-semibold mb-2 text-gray-900 ${poppins.className}`}>
-              {currentQuestion.question}
-            </h2>
-            {!currentQuestion.required && (
-              <p className="text-sm text-gray-500 mb-6">Optional</p>
-            )}
-
-            {currentQuestion.type === 'text' && (
-              <div className="relative mt-8">
-                <input
-                  type="text"
-                  value={formData[currentQuestion.id] as string}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && formData[currentQuestion.id]) {
-                      e.preventDefault();
-                      goToNextQuestion();
-                    }
-                  }}
-                  placeholder={currentQuestion.placeholder}
-                  className={`w-full px-0 py-6 text-2xl border-0 border-b-2 border-gray-200 hover:border-gray-300 focus:border-black focus:outline-none focus:ring-0 bg-transparent ${poppins.className}`}
-                  autoFocus
-                />
-              </div>
-            )}
-
-            {currentQuestion.type === 'textarea' && (
-              <textarea
-                value={formData[currentQuestion.id] as string}
-                onChange={(e) => handleInputChange(e.target.value)}
-                placeholder={currentQuestion.placeholder}
-                rows={5}
-                className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50"
-                autoFocus
-              />
-            )}
-
-            {currentQuestion.type === 'select' && currentQuestion.options && (
-              <div className="space-y-3 mt-4">
-                {currentQuestion.options.map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => {
-                      handleInputChange(option);
-                      goToNextQuestion();
-                    }}
-                    className={`w-full px-6 py-4 text-left text-lg border-2 rounded-xl transition-all ${
-                      formData[currentQuestion.id] === option
-                        ? 'border-black bg-gray-50 text-gray-900 shadow-sm'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {option}
-                  </button>
+        <div className="flex max-w-6xl mx-auto">
+          {/* Left sidebar with steps */}
+          <div className="hidden lg:block w-64 pt-32 pr-8 border-r border-gray-100">
+            <div className="sticky top-32">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                Job Details
+              </h3>
+              <ol className="space-y-6">
+                {questions.map((q, index) => (
+                  <li key={q.id} className="flex items-start">
+                    <div className={`flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs mr-3 ${
+                      index < currentQuestionIndex 
+                        ? 'bg-black text-white' 
+                        : index === currentQuestionIndex
+                          ? 'border-2 border-black text-black'
+                          : 'border border-gray-300 text-gray-400'
+                    }`}>
+                      {index < currentQuestionIndex ? '✓' : index + 1}
+                    </div>
+                    <span className={`text-sm ${
+                      index === currentQuestionIndex 
+                        ? 'font-medium text-black' 
+                        : index < currentQuestionIndex
+                          ? 'text-gray-700'
+                          : 'text-gray-400'
+                    }`}>
+                      {q.question}
+                    </span>
+                  </li>
                 ))}
-              </div>
-            )}
+              </ol>
+            </div>
+          </div>
 
-            {currentQuestion.type === 'skills' && (
-              <div className="space-y-4 mt-4">
-                <Combobox
-                  value={null}
-                  onChange={(skill: string | null) => {
-                    if (skill && !formData.skills.includes(skill)) {
-                      handleInputChange([...formData.skills, skill]);
-                    }
-                  }}
-                >
-                  <div className="relative">
-                    <Combobox.Input
-                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black bg-gray-50"
-                      placeholder="Type to search skills..."
-                      onChange={(e) => setSkillQuery(e.target.value)}
-                      autoFocus
-                    />
-                    <Transition
-                      enter="transition duration-100 ease-out"
-                      enterFrom="transform scale-95 opacity-0"
-                      enterTo="transform scale-100 opacity-100"
-                      leave="transition duration-75 ease-out"
-                      leaveFrom="transform scale-100 opacity-100"
-                      leaveTo="transform scale-95 opacity-0"
+          {/* Main content */}
+          <motion.div
+            key={currentQuestion.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex-1 px-4 sm:px-6 lg:px-8 pt-32 pb-16"
+          >
+            <div className="relative">
+              {/* Decorative pattern */}
+              <div className="absolute top-4 right-0 w-64 h-64 bg-gradient-to-br from-gray-50 to-transparent rounded-full opacity-60 -z-10" />
+              
+              <h2 className={`text-4xl font-semibold mb-2 text-gray-900 ${poppins.className}`}>
+                {currentQuestion.question}
+              </h2>
+              {!currentQuestion.required && (
+                <p className="text-sm text-gray-500 mb-6">Optional</p>
+              )}
+
+              {currentQuestion.type === 'text' && (
+                <div className="relative mt-8">
+                  <input
+                    type="text"
+                    value={formData[currentQuestion.id] as string}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && formData[currentQuestion.id]) {
+                        e.preventDefault();
+                        goToNextQuestion();
+                      }
+                    }}
+                    placeholder={currentQuestion.placeholder}
+                    className={`w-full px-0 py-6 text-2xl border-0 border-b-2 border-gray-200 hover:border-gray-300 focus:border-black focus:outline-none focus:ring-0 bg-transparent ${poppins.className}`}
+                    autoFocus
+                  />
+                </div>
+              )}
+
+              {currentQuestion.type === 'textarea' && (
+                <div className="mt-6 relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-50 via-transparent to-gray-50 rounded-lg -z-10 opacity-40" />
+                  <textarea
+                    value={formData[currentQuestion.id] as string}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    placeholder={currentQuestion.placeholder}
+                    rows={5}
+                    className="w-full px-6 py-5 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black bg-white shadow-sm"
+                    autoFocus
+                  />
+                </div>
+              )}
+
+              {currentQuestion.type === 'select' && currentQuestion.options && (
+                <div className="space-y-3 mt-8">
+                  {currentQuestion.options.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        handleInputChange(option);
+                        goToNextQuestion();
+                      }}
+                      className={`group w-full px-6 py-5 text-left text-lg border-2 rounded-xl transition-all 
+                        ${formData[currentQuestion.id] === option
+                          ? 'border-black bg-gray-50 text-gray-900 shadow-sm'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        }`}
                     >
-                      <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                        {filteredSkills.map((skill) => (
-                          <Combobox.Option
-                            key={skill}
-                            value={skill}
-                            className={({ active }) =>
-                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                active ? 'bg-black text-white' : 'text-gray-900'
-                              }`
-                            }
-                          >
-                            {skill}
-                          </Combobox.Option>
-                        ))}
-                      </Combobox.Options>
-                    </Transition>
-                  </div>
-                </Combobox>
-
-                {formData.skills.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {formData.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
-                      >
-                        {skill}
-                        <button
-                          type="button"
-                          onClick={() => handleInputChange(formData.skills.filter(s => s !== skill))}
-                          className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-gray-200"
+                      <div className="flex items-center">
+                        <div className={`w-5 h-5 mr-3 rounded-full border-2 flex items-center justify-center
+                          ${formData[currentQuestion.id] === option
+                            ? 'border-black bg-black'
+                            : 'border-gray-300 group-hover:border-gray-400'
+                          }`}
                         >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                          {formData[currentQuestion.id] === option && (
+                            <div className="w-2 h-2 rounded-full bg-white" />
+                          )}
+                        </div>
+                        {option}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
 
-          <div className="mt-8 flex justify-between items-center">
-            <button
-              type="button"
-              onClick={goToPreviousQuestion}
-              className={`px-6 py-2 text-sm font-medium rounded-lg ${
-                currentQuestionIndex === 0
-                  ? 'invisible'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Back
-            </button>
+              {currentQuestion.type === 'skills' && (
+                <div className="space-y-4 mt-8">
+                  <Combobox
+                    value={null}
+                    onChange={(skill: string | null) => {
+                      if (skill && !formData.skills.includes(skill)) {
+                        handleInputChange([...formData.skills, skill]);
+                      }
+                    }}
+                  >
+                    <div className="relative">
+                      <Combobox.Input
+                        className="w-full px-6 py-5 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black bg-white shadow-sm"
+                        placeholder="Type to search skills..."
+                        onChange={(e) => setSkillQuery(e.target.value)}
+                        autoFocus
+                      />
+                      <Transition
+                        enter="transition duration-100 ease-out"
+                        enterFrom="transform scale-95 opacity-0"
+                        enterTo="transform scale-100 opacity-100"
+                        leave="transition duration-75 ease-out"
+                        leaveFrom="transform scale-100 opacity-100"
+                        leaveTo="transform scale-95 opacity-0"
+                      >
+                        <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {filteredSkills.map((skill) => (
+                            <Combobox.Option
+                              key={skill}
+                              value={skill}
+                              className={({ active }) =>
+                                `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                  active ? 'bg-black text-white' : 'text-gray-900'
+                                }`
+                              }
+                            >
+                              {skill}
+                            </Combobox.Option>
+                          ))}
+                        </Combobox.Options>
+                      </Transition>
+                    </div>
+                  </Combobox>
 
-            <button
-              type="button"
-              onClick={goToNextQuestion}
-              className="px-6 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800"
-            >
-              Continue
-            </button>
-          </div>
-        </motion.div>
+                  {formData.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {formData.skills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
+                        >
+                          {skill}
+                          <button
+                            type="button"
+                            onClick={() => handleInputChange(formData.skills.filter(s => s !== skill))}
+                            className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-gray-200"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-12 flex justify-between items-center">
+              <button
+                type="button"
+                onClick={goToPreviousQuestion}
+                className={`px-6 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  currentQuestionIndex === 0
+                    ? 'invisible'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Back
+              </button>
+
+              <button
+                type="button"
+                onClick={goToNextQuestion}
+                className="px-8 py-3 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 shadow-sm transition-all hover:shadow"
+                disabled={!formData[currentQuestion.id]}
+              >
+                Continue
+              </button>
+            </div>
+          </motion.div>
+        </div>
       </div>
     );
   };
@@ -393,30 +448,42 @@ export default function CreateJobPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-2xl mx-auto"
+        className="max-w-3xl mx-auto pt-24"
       >
-        <h2 className="text-2xl font-semibold mb-6 text-gray-900">Review Job Posting</h2>
+        <div className="mb-12 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className={`text-3xl font-semibold mb-2 text-gray-900 ${poppins.className}`}>Review Your Job Posting</h2>
+          <p className="text-gray-500">Make sure everything looks good before publishing</p>
+        </div>
         
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 space-y-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-8 space-y-8">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">{formData.title}</h3>
-              <p className="mt-1 text-sm text-gray-500">{formData.company} • {formData.location}</p>
+              <h3 className={`text-2xl font-semibold text-gray-900 ${poppins.className}`}>{formData.title}</h3>
+              <p className="mt-2 text-gray-500 flex items-center">
+                <span className="font-medium text-gray-900">{formData.company}</span>
+                <span className="mx-2">•</span>
+                <span>{formData.location}</span>
+              </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <h4 className="text-sm font-medium text-gray-500">Description</h4>
-                <p className="mt-1 text-gray-900">{formData.description}</p>
+                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Description</h4>
+                <p className="text-gray-800 whitespace-pre-line">{formData.description}</p>
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-gray-500">Required Skills</h4>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Required Skills</h4>
+                <div className="flex flex-wrap gap-2">
                   {formData.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
                     >
                       {skill}
                     </span>
@@ -424,21 +491,70 @@ export default function CreateJobPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Time Commitment</h4>
-                  <p className="mt-1 text-gray-900">{formData.timeCommitment}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Time Commitment</h4>
+                  <p className="text-gray-900 font-medium">{formData.timeCommitment}</p>
                 </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Hours per Week</h4>
-                  <p className="mt-1 text-gray-900">{formData.hoursPerWeek}</p>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Hours per Week</h4>
+                  <p className="text-gray-900 font-medium">{formData.hoursPerWeek}</p>
                 </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Company Stage</h4>
-                  <p className="mt-1 text-gray-900">{formData.companyStage}</p>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Company Stage</h4>
+                  <p className="text-gray-900 font-medium">{formData.companyStage}</p>
                 </div>
               </div>
+              
+              {(formData.companyWebsite || formData.companyLinkedIn || formData.companySocial) && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Company Links</h4>
+                  <div className="space-y-2">
+                    {formData.companyWebsite && (
+                      <p className="text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                        {formData.companyWebsite}
+                      </p>
+                    )}
+                    {formData.companyLinkedIn && (
+                      <p className="text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                        {formData.companyLinkedIn}
+                      </p>
+                    )}
+                    {formData.companySocial && (
+                      <p className="text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.066 9.645c.183 4.04-2.83 8.544-8.164 8.544-1.622 0-3.131-.476-4.402-1.291 1.524.18 3.045-.244 4.252-1.189-1.256-.023-2.317-.854-2.684-1.995.451.086.895.061 1.298-.049-1.381-.278-2.335-1.522-2.304-2.853.388.215.83.344 1.301.359-1.279-.855-1.641-2.544-.889-3.835 1.416 1.738 3.533 2.881 5.92 3.001-.419-1.796.944-3.527 2.799-3.527.825 0 1.572.349 2.096.907.654-.128 1.27-.368 1.824-.697-.215.671-.67 1.233-1.263 1.589.581-.07 1.135-.224 1.649-.453-.384.578-.87 1.084-1.433 1.489z"/>
+                        </svg>
+                        {formData.companySocial}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+          </div>
+          
+          <div className="px-8 py-6 bg-gray-50 border-t border-gray-200 flex justify-between">
+            <button
+              type="button"
+              onClick={() => setIsReviewing(false)}
+              className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Edit Details
+            </button>
+            
+            <button
+              type="button"
+              className="px-8 py-3 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 shadow-sm"
+            >
+              Publish Job
+            </button>
           </div>
         </div>
       </motion.div>
@@ -446,8 +562,8 @@ export default function CreateJobPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50">
+      <div>
         <AnimatePresence mode="wait">
           {isReviewing ? renderReview() : renderQuestion()}
         </AnimatePresence>
