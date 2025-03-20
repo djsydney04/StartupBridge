@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://goolmqemnjpyiluwxnkg.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdvb2xtcWVtbmpweWlsdXd4bmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0MTI2OTksImV4cCI6MjA1Njk4ODY5OX0.icxzNy6587kAiJHZ1GvONiqP320qnT6HYLZGUXd6u_g';
+const supabaseUrl = 'https://nhjnbypbpikvfdkyowco.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oam5ieXBicGlrdmZka3lvd2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0NTc1NjMsImV4cCI6MjA1ODAzMzU2M30.pyNmvhO4vhJSu8DMdLH3zXM9CH7INVil1zHEDRDgvv8';
 
 // Create a single supabase client for interacting with your database
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -45,6 +45,8 @@ export type Profile = {
   experience?: string;
   industries_interest?: string;
   commitment_type?: string;
+  is_admin?: boolean;
+  email?: string;
 };
 
 export type Event = {
@@ -111,67 +113,6 @@ export const signIn = async (email: string, password: string) => {
   try {
     console.log('Attempting sign in for:', email);
     
-    // Check if this is a demo user
-    const isDemo = DEMO_USERS.some(user => 
-      user.email === email && user.password === password
-    );
-    
-    // Only use demo login - Supabase email logins are disabled
-    if (isDemo) {
-      console.log('Demo mode detected, creating demo user');
-      const demoUser = {
-        id: 'demo-user-id',
-        email: 'demo@example.com',
-      };
-      
-      // Store in localStorage
-      setAuthUser(demoUser);
-      
-      // Create a demo profile
-      const demoProfile = {
-        id: 'demo-profile-id',
-        user_id: demoUser.id,
-        university: 'Chapman University',
-        bio: 'Passionate entrepreneur and computer science student at Chapman University. Currently working on innovative solutions in the AI and machine learning space. Looking to connect with like-minded founders and potential co-founders.',
-        interests: ['Artificial Intelligence', 'Startups', 'Technology', 'Entrepreneurship'],
-        created_at: new Date().toISOString(),
-        full_name: 'Alex Chapman',
-        major: 'Computer Science',
-        year: 'Senior',
-        skills: ['Programming', 'Machine Learning', 'Product Management', 'UI/UX Design'],
-        linkedin_url: 'https://linkedin.com/in/demo',
-        twitter_url: 'https://twitter.com/demo',
-        avatar_url: 'https://avatars.githubusercontent.com/u/12345678',
-        role: 'Founder',
-        industry: 'Technology',
-        startup_stage: 'MVP',
-        looking_for: 'Technical Co-Founder, Marketing Lead',
-        startup_name: 'AI Innovate',
-        startup_idea: 'Building an AI-powered platform that helps students find and connect with potential co-founders based on complementary skills and shared interests.',
-        roles_looking_for: 'Technical Co-Founder, Marketing Lead',
-        skills_bringing: 'Product vision, technical architecture, UI/UX design',
-        interested_roles: ['Founder', 'CTO'],
-        experience: '3 years of software development experience, previously founded a student-led startup',
-        industries_interest: 'Artificial Intelligence, EdTech, SaaS',
-        commitment_type: 'Full-time'
-      };
-      
-      return { 
-        success: true, 
-        user: demoUser,
-        profile: demoProfile,
-        isDemo: true 
-      };
-    } else {
-      // Return clear error message about demo accounts
-      return {
-        success: false,
-        error: 'Email sign-in is available only for demo accounts. Please use mitic@chapman.edu with password123 or demo@example.com with password123'
-      };
-    }
-    
-    // Commented out actual Supabase auth since email logins are disabled
-    /*
     // Perform the actual Supabase authentication
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -196,12 +137,132 @@ export const signIn = async (email: string, password: string) => {
     // Store user in localStorage
     setAuthUser(data.user);
     
+    // Ensure user exists in users table
+    try {
+      const { data: userData, error: userCheckError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id)
+        .maybeSingle();
+      
+      if (userCheckError) {
+        console.error('Error checking user in users table:', userCheckError);
+      } else if (!userData) {
+        // User not in table, add them
+        console.log('User not found in users table, adding now...');
+        await supabase
+          .from('users')
+          .insert([{
+            id: data.user.id,
+            email: email,
+            created_at: new Date().toISOString(),
+            full_name: data.user.user_metadata?.full_name || '',
+          }]);
+      }
+    } catch (userError) {
+      console.error('Exception checking/creating user record:', userError);
+    }
+    
+    // Try to get existing profile or create one if it doesn't exist
+    let profile = null;
+    let profileError = null;
+    
+    try {
+      const profileResult = await getProfile(data.user.id);
+      profile = profileResult.profile;
+      profileError = profileResult.error;
+      
+      // If profile is null but no error, explicitly create one
+      if (!profile && !profileError) {
+        console.log('No profile found, explicitly creating one');
+        
+        const { error: profileInsertError } = await supabase
+          .from('profiles')
+          .insert([{
+            user_id: data.user.id,
+            university: 'Chapman University',
+            full_name: data.user.user_metadata?.full_name || '',
+            created_at: new Date().toISOString(),
+            skills: [],
+            interests: []
+          }]);
+        
+        if (profileInsertError) {
+          console.error('Error creating profile during sign in:', profileInsertError);
+        } else {
+          console.log('Profile created during sign in');
+          
+          // Fetch the newly created profile
+          const newProfileResult = await getProfile(data.user.id);
+          profile = newProfileResult.profile;
+          profileError = newProfileResult.error;
+        }
+      }
+    } catch (profileFetchError) {
+      console.error('Exception fetching/creating profile during sign in:', profileFetchError);
+    }
+    
+    if (profileError) {
+      console.error('Error with profile during sign in:', profileError);
+    }
+    
+    // Check if we have questionnaire data from landing page to add to profile
+    let questionnaire = null;
+    try {
+      const questData = localStorage.getItem('founderConnectQuestionnaire');
+      if (questData) {
+        questionnaire = JSON.parse(questData);
+        console.log('Found questionnaire data:', questionnaire);
+        
+        // If we have questionnaire data and a profile, update the profile with this data
+        if (questionnaire && profile) {
+          const profileUpdate: Partial<Profile> = {};
+          
+          // Add name from questionnaire if available
+          if (questionnaire.name && (!profile.full_name || profile.full_name === '')) {
+            profileUpdate.full_name = questionnaire.name;
+          }
+          
+          // Set role based on questionnaire
+          if (questionnaire.role && (!profile.role || profile.role === '')) {
+            profileUpdate.role = questionnaire.role.includes('Founder') ? 'Founder' : 
+              questionnaire.role.includes('Developer') ? 'Technical Co-Founder' :
+              questionnaire.role.includes('Designer') ? 'Creative Co-Founder' :
+              questionnaire.role.includes('Business') ? 'Business Co-Founder' : 'Job Seeker';
+          }
+          
+          // Set interests if we have them from questionnaire
+          if (questionnaire.interest) {
+            const currentInterests = profile.interests || [];
+            if (!currentInterests.includes(questionnaire.interest)) {
+              profileUpdate.interests = [...currentInterests, questionnaire.interest];
+            }
+          }
+          
+          // Only update if we have changes to make
+          if (Object.keys(profileUpdate).length > 0) {
+            console.log('Updating profile with questionnaire data:', profileUpdate);
+            const updateResult = await updateProfile(data.user.id, profileUpdate);
+            
+            if (updateResult.success && updateResult.profile) {
+              profile = updateResult.profile;
+            }
+          }
+          
+          // Clean up questionnaire data after using it
+          localStorage.removeItem('founderConnectQuestionnaire');
+        }
+      }
+    } catch (e) {
+      console.error('Error processing questionnaire data:', e);
+    }
+    
     return { 
       success: true, 
       user: data.user,
+      profile,
       isDemo: false
     };
-    */
   } catch (error: any) {
     console.error('Unexpected error during sign in:', error);
     return { 
@@ -219,8 +280,16 @@ export const signOut = async () => {
     // First clear the local storage
     clearAuthUser();
     
-    // Then sign out from Supabase
-    await supabase.auth.signOut();
+    // Then sign out from Supabase using the correct method
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Error during sign out:', error.message);
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    }
     
     return { success: true };
   } catch (error: any) {
@@ -243,24 +312,27 @@ export const isAuthenticated = async () => {
       return { authenticated: true, user: localUser };
     }
     
-    // If not in localStorage, check with Supabase
+    // If not in localStorage, check with Supabase using the correct method
     const { data, error } = await supabase.auth.getSession();
     
     if (error) {
-      console.error('Error checking authentication:', error.message);
+      console.error('Error getting session:', error.message);
+      return { authenticated: false, error: error.message };
+    }
+    
+    if (!data || !data.session || !data.session.user) {
       return { authenticated: false };
     }
     
-    if (data?.session?.user) {
-      // Store the user in localStorage for next time
-      setAuthUser(data.session.user);
-      return { authenticated: true, user: data.session.user };
-    }
+    const user = data.session.user;
     
-    return { authenticated: false };
-  } catch (error) {
-    console.error('Unexpected error checking authentication:', error);
-    return { authenticated: false };
+    // Store user in localStorage
+    setAuthUser(user);
+    
+    return { authenticated: true, user };
+  } catch (error: any) {
+    console.error('Error checking authentication:', error);
+    return { authenticated: false, error: error.message };
   }
 };
 
@@ -269,23 +341,206 @@ export const isAuthenticated = async () => {
  */
 export const getProfile = async (userId: string) => {
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    console.log(`Fetching profile for user ${userId}`);
     
-    if (error) {
-      console.error('Error fetching profile:', error.message);
-      return { profile: null, error: error.message };
+    // For demo user, return the demo profile from localStorage if exists, otherwise use default
+    if (userId === 'demo-user-id') {
+      let customProfile = null;
+      
+      try {
+        // Check if there's a custom profile in localStorage
+        const storedProfile = localStorage.getItem('demoUserProfile');
+        if (storedProfile) {
+          customProfile = JSON.parse(storedProfile);
+          console.log('Retrieved custom profile from localStorage:', customProfile);
+        }
+      } catch (e) {
+        console.error('Error reading demo profile from localStorage:', e);
+      }
+      
+      // If we have a custom profile, use it
+      if (customProfile) {
+        return { profile: customProfile, error: null };
+      }
+      
+      // Otherwise use the default demo profile
+      const demoProfile = {
+        id: 'demo-profile-id',
+        user_id: 'demo-user-id',
+        university: 'Chapman University',
+        bio: 'Passionate entrepreneur and computer science student at Chapman University. Currently working on innovative solutions in the AI and machine learning space. Looking to connect with like-minded founders and potential co-founders.',
+        interests: ['Artificial Intelligence', 'Startups', 'Technology', 'Entrepreneurship'],
+        created_at: new Date().toISOString(),
+        full_name: 'Alex Chapman',
+        major: 'Computer Science',
+        year: 'Senior',
+        skills: ['Programming', 'Machine Learning', 'Product Management', 'UI/UX Design'],
+        linkedin_url: 'https://linkedin.com/in/demo',
+        twitter_url: 'https://twitter.com/demo',
+        avatar_url: 'https://avatars.githubusercontent.com/u/12345678',
+        role: 'Founder',
+        industry: 'Technology',
+        startup_stage: 'MVP',
+        looking_for: 'Technical Co-Founder, Marketing Lead',
+        startup_name: 'AI Innovate',
+        startup_idea: 'Building an AI-powered platform that helps students find and connect with potential co-founders based on complementary skills and shared interests.',
+        roles_looking_for: 'Technical Co-Founder, Marketing Lead',
+        skills_bringing: 'Product vision, technical architecture, UI/UX design',
+        interested_roles: ['Founder', 'CTO'],
+        experience: '3 years of software development experience, previously founded a student-led startup',
+        industries_interest: 'Artificial Intelligence, EdTech, SaaS',
+        commitment_type: 'Full-time',
+        is_admin: true
+      };
+      
+      return { profile: demoProfile, error: null };
+    }
+
+    // Make multiple attempts to get or create the profile
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        // Try to get the user's profile
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        
+        // If profile found, return it
+        if (data) {
+          console.log(`Profile found for user ${userId} on attempt ${attempt + 1}:`, data);
+          return { profile: data, error: null };
+        }
+        
+        // If no profile found, create one
+        if (error) {
+          console.log(`Profile not found on attempt ${attempt + 1}, creating a new one`);
+          
+          // Get user info if available
+          let fullName = '';
+          try {
+            const { data: userData } = await supabase
+              .from('users')
+              .select('full_name')
+              .eq('id', userId)
+              .single();
+              
+            if (userData && userData.full_name) {
+              fullName = userData.full_name;
+            }
+          } catch (nameError) {
+            console.error('Error getting full name:', nameError);
+          }
+          
+          // Create a basic profile with direct SQL insert
+          const newProfile = {
+            user_id: userId,
+            university: 'Chapman University',
+            full_name: fullName,
+            skills: [],
+            interests: [],
+            created_at: new Date().toISOString()
+          };
+          
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([newProfile]);
+          
+          if (insertError) {
+            console.error(`Error creating profile on attempt ${attempt + 1}:`, insertError.message);
+            
+            if (attempt === 2) {
+              // On final attempt, return a fabricated profile to prevent UI issues
+              console.log('Returning fabricated profile after all attempts failed');
+              return { 
+                profile: { 
+                  id: `temp-${userId}`,
+                  user_id: userId,
+                  university: 'Chapman University',
+                  full_name: fullName || '',
+                  skills: [],
+                  interests: [],
+                  created_at: new Date().toISOString(),
+                  bio: null
+                }, 
+                error: null 
+              };
+            }
+          } else {
+            console.log(`Profile created successfully on attempt ${attempt + 1}`);
+            
+            // Fetch the newly created profile
+            const { data: createdProfile, error: fetchError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('user_id', userId)
+              .single();
+            
+            if (fetchError) {
+              console.error('Error fetching newly created profile:', fetchError.message);
+            } else if (createdProfile) {
+              console.log('Retrieved newly created profile:', createdProfile);
+              return { profile: createdProfile, error: null };
+            }
+          }
+          
+          // If we reach here, we'll retry on the next attempt
+          await new Promise(resolve => setTimeout(resolve, 500)); // Wait before retrying
+        }
+      } catch (attemptError) {
+        console.error(`Error on profile fetch/create attempt ${attempt + 1}:`, attemptError);
+        
+        if (attempt === 2) {
+          // On final attempt, return a fabricated profile to prevent UI issues
+          return { 
+            profile: { 
+              id: `temp-${userId}`,
+              user_id: userId,
+              university: 'Chapman University',
+              full_name: '',
+              skills: [],
+              interests: [],
+              created_at: new Date().toISOString(),
+              bio: null
+            }, 
+            error: null 
+          };
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 500)); // Wait before retrying
+      }
     }
     
-    return { profile: data, error: null };
-  } catch (error: any) {
-    console.error('Unexpected error fetching profile:', error);
+    // Fallback with a minimal profile if all attempts failed
+    console.log('Fallback: Returning minimal profile after all attempts');
     return { 
-      profile: null, 
-      error: error.message || 'An unexpected error occurred' 
+      profile: { 
+        id: `fallback-${userId}`,
+        user_id: userId,
+        university: 'Chapman University',
+        full_name: '',
+        skills: [],
+        interests: [],
+        created_at: new Date().toISOString(),
+        bio: null
+      }, 
+      error: null 
+    };
+  } catch (error: any) {
+    console.error('Top-level error in getProfile:', error);
+    // Return a minimal profile even in case of error to prevent endless loading
+    return { 
+      profile: { 
+        id: `error-${userId}`,
+        user_id: userId,
+        university: 'Chapman University',
+        full_name: '',
+        skills: [],
+        interests: [],
+        created_at: new Date().toISOString(),
+        bio: null
+      }, 
+      error: null 
     };
   }
 };
@@ -370,82 +625,223 @@ export const deleteEvent = async (eventId: string) => {
 };
 
 /**
- * Get the current user
+ * Get the current authenticated user
  */
 export const getCurrentUser = async () => {
   try {
     // First check localStorage
     const localUser = getAuthUser();
     if (localUser) {
-      return { user: localUser, error: null };
+      return { user: localUser };
     }
     
-    // If not in localStorage, check with Supabase
+    // If not in localStorage, check with Supabase using the correct method
     const { data, error } = await supabase.auth.getUser();
     
     if (error) {
       console.error('Error getting current user:', error.message);
-      return { user: null, error: error.message };
+      return { error: error.message };
     }
     
-    if (data?.user) {
-      // Store the user in localStorage for next time
-      setAuthUser(data.user);
-      return { user: data.user, error: null };
+    if (!data || !data.user) {
+      return { error: 'No user found' };
     }
     
-    return { user: null, error: 'No user found' };
+    // Store user in localStorage
+    setAuthUser(data.user);
+    
+    return { user: data.user };
   } catch (error: any) {
-    console.error('Unexpected error getting current user:', error);
-    return { user: null, error: error.message || 'An unexpected error occurred' };
+    console.error('Error getting current user:', error);
+    return { error: error.message };
   }
 };
 
 /**
  * Sign up a new user
  */
-export const signUp = async (email: string, password: string, fullName?: string) => {
+export const signUp = async (email: string, password: string, userData?: { full_name?: string }) => {
   try {
-    // Register the user with Supabase
+    console.log('Creating new user with email:', email);
+    
+    // First register the user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          full_name: fullName || '',
-        },
-      },
+          full_name: userData?.full_name || ''
+        }
+      }
     });
     
     if (error) {
       console.error('Sign up error:', error.message);
-      return { 
-        data: null,
-        error: error.message 
-      };
+      return { success: false, error: error.message };
     }
     
-    return { 
-      data: data,
-      error: null
-    };
+    if (!data || !data.user) {
+      return { success: false, error: 'No user returned from sign up' };
+    }
+    
+    console.log('User created successfully in Auth:', data.user);
+    
+    // Wait a short moment to ensure auth is completed
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    
+    // Explicitly add the user to the users table with a direct insert
+    try {
+      const { error: userInsertError } = await supabase
+        .from('users')
+        .insert([{
+          id: data.user.id,
+          email: email,
+          created_at: new Date().toISOString(),
+          full_name: userData?.full_name || '',
+        }]);
+      
+      if (userInsertError) {
+        console.error('Error adding user to users table:', userInsertError);
+      } else {
+        console.log('User added to users table successfully');
+      }
+    } catch (userError) {
+      console.error('Exception adding user to users table:', userError);
+    }
+    
+    // Create a profile for the new user with direct insert
+    try {
+      const { error: profileInsertError } = await supabase
+        .from('profiles')
+        .insert([{
+          user_id: data.user.id,
+          university: 'Chapman University',
+          full_name: userData?.full_name || '',
+          created_at: new Date().toISOString(),
+          skills: [],
+          interests: []
+        }]);
+      
+      if (profileInsertError) {
+        console.error('Error inserting profile directly:', profileInsertError);
+      } else {
+        console.log('Profile inserted directly successfully');
+      }
+    } catch (profileInsertError) {
+      console.error('Exception inserting profile directly:', profileInsertError);
+    }
+    
+    return { success: true, user: data.user };
   } catch (error: any) {
     console.error('Unexpected error during sign up:', error);
-    return { 
-      data: null,
-      error: error.message || 'An unexpected error occurred' 
-    };
+    return { success: false, error: error.message || 'An unexpected error occurred' };
   }
 };
 
 /**
  * Create a user profile
  */
-export const createProfile = async (profileData: Partial<Profile>) => {
+export const createProfile = async (profileData: ExtendedProfileData) => {
   try {
+    console.log('Creating new profile:', profileData);
+    
+    // Handle demo mode
+    if (profileData.user_id === 'demo-user-id') {
+      console.log('Demo mode - simulating profile creation');
+      const demoProfile = {
+        id: 'demo-profile-id',
+        user_id: 'demo-user-id',
+        university: profileData.university || 'Chapman University',
+        bio: profileData.bio || 'Passionate entrepreneur and computer science student at Chapman University.',
+        interests: profileData.interests || ['Artificial Intelligence', 'Startups', 'Technology'],
+        full_name: profileData.full_name || 'Alex Chapman',
+        major: profileData.major || 'Computer Science',
+        year: profileData.year || 'Senior',
+        skills: profileData.skills || ['Programming', 'Machine Learning'],
+        created_at: new Date().toISOString(),
+        is_admin: profileData.is_admin || false
+      };
+      
+      return { 
+        success: true, 
+        profile: demoProfile 
+      };
+    }
+    
+    // Check if user exists in users table before creating profile
+    if (profileData.user_id) {
+      // First check if a profile already exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', profileData.user_id)
+        .maybeSingle();
+      
+      if (existingProfile) {
+        console.log('Profile already exists, returning existing profile:', existingProfile);
+        return { 
+          success: true, 
+          profile: existingProfile,
+          message: 'Profile already exists'
+        };
+      }
+      
+      // Check if the user exists in the users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', profileData.user_id)
+        .maybeSingle();
+      
+      // If user doesn't exist in users table, try to add them
+      if (!userData && !userError) {
+        console.log('User not found in users table, attempting to add');
+        
+        // Get user from auth if we need to
+        if (profileData.user_id && (!profileData.email || !profileData.full_name)) {
+          try {
+            // Try to get user info from auth
+            const { data: authUserData } = await supabase.auth.getUser(profileData.user_id);
+            
+            if (authUserData?.user) {
+              // Try to insert the user into the users table
+              await supabase
+                .from('users')
+                .insert([{
+                  id: profileData.user_id,
+                  email: authUserData.user.email,
+                  created_at: new Date().toISOString(),
+                  full_name: profileData.full_name || authUserData.user.user_metadata?.full_name || '',
+                }]);
+              
+              console.log('Added user to users table from auth data');
+            }
+          } catch (authErr) {
+            console.error('Error getting auth user:', authErr);
+          }
+        } else if (profileData.user_id && profileData.email) {
+          // Insert with known data
+          await supabase
+            .from('users')
+            .insert([{
+              id: profileData.user_id,
+              email: profileData.email,
+              created_at: new Date().toISOString(),
+              full_name: profileData.full_name || '',
+            }]);
+          
+          console.log('Added user to users table from profile data');
+        }
+      }
+    }
+    
+    // Prepare the profile data (exclude any email field since it's not in the profiles table schema)
+    const { email, ...cleanProfileData } = profileData;
+    
+    // Create new profile
     const { data, error } = await supabase
       .from('profiles')
-      .insert([profileData])
+      .insert([cleanProfileData])
       .select()
       .single();
     
@@ -457,6 +853,7 @@ export const createProfile = async (profileData: Partial<Profile>) => {
       };
     }
     
+    console.log('Profile created successfully:', data);
     return { 
       success: true, 
       profile: data 
@@ -470,32 +867,209 @@ export const createProfile = async (profileData: Partial<Profile>) => {
   }
 };
 
+interface ExtendedProfileData extends Partial<Profile> {
+  email?: string;
+}
+
 /**
  * Update a user profile
  */
-export const updateProfile = async (userId: string, profileData: Partial<Profile>) => {
+export const updateProfile = async (userId: string, profileData: ExtendedProfileData) => {
   try {
-    const { data, error } = await supabase
+    console.log(`Updating profile for user ${userId}:`, profileData);
+    
+    // Handle demo mode
+    if (userId === 'demo-user-id') {
+      console.log('Demo mode - simulating profile update');
+      
+      // Ensure we're properly handling the existing demo profile
+      // Get the current demo profile from localStorage if it exists
+      let existingDemoProfile: any = null;
+      try {
+        const storedProfile = localStorage.getItem('demoUserProfile');
+        if (storedProfile) {
+          existingDemoProfile = JSON.parse(storedProfile);
+          console.log('Retrieved existing profile from localStorage for update:', existingDemoProfile);
+        } else {
+          console.log('No existing profile found in localStorage');
+        }
+      } catch (e) {
+        console.error('Error reading profile from localStorage during update:', e);
+      }
+
+      // If no stored profile, use a default base profile
+      if (!existingDemoProfile) {
+        console.log('Creating new base profile for update');
+        existingDemoProfile = {
+          id: 'demo-profile-id',
+          user_id: 'demo-user-id',
+          university: 'Chapman University',
+          bio: '',
+          interests: [],
+          created_at: new Date().toISOString(),
+          full_name: '',
+          major: '',
+          year: '',
+          skills: [],
+          role: '',
+          industry: '',
+          startup_stage: '',
+          looking_for: '',
+          startup_name: '',
+          startup_idea: '',
+        };
+      }
+      
+      // Create an updated profile by merging existing and new data
+      const updatedProfile = {
+        ...existingDemoProfile,
+        ...profileData,
+      };
+      
+      // Handle array fields specially to ensure they remain arrays
+      if (profileData.skills) {
+        if (Array.isArray(profileData.skills)) {
+          updatedProfile.skills = profileData.skills;
+        } else if (typeof profileData.skills === 'string') {
+          updatedProfile.skills = profileData.skills.split(',').map(s => s.trim()).filter(Boolean);
+        } else {
+          updatedProfile.skills = existingDemoProfile.skills || [];
+        }
+      }
+      
+      if (profileData.interests) {
+        if (Array.isArray(profileData.interests)) {
+          updatedProfile.interests = profileData.interests;
+        } else if (typeof profileData.interests === 'string') {
+          updatedProfile.interests = profileData.interests.split(',').map(i => i.trim()).filter(Boolean);
+        } else {
+          updatedProfile.interests = existingDemoProfile.interests || [];
+        }
+      }
+      
+      if (profileData.interested_roles) {
+        if (Array.isArray(profileData.interested_roles)) {
+          updatedProfile.interested_roles = profileData.interested_roles;
+        } else if (typeof profileData.interested_roles === 'string') {
+          updatedProfile.interested_roles = profileData.interested_roles.split(',').map(r => r.trim()).filter(Boolean);
+        } else {
+          updatedProfile.interested_roles = existingDemoProfile.interested_roles || [];
+        }
+      }
+      
+      // Store the updated profile in localStorage for persistence
+      try {
+        localStorage.setItem('demoUserProfile', JSON.stringify(updatedProfile));
+        console.log('Saved updated profile to localStorage:', updatedProfile);
+      } catch (e) {
+        console.error('Error saving updated profile to localStorage:', e);
+      }
+      
+      return { 
+        success: true, 
+        profile: updatedProfile 
+      };
+    }
+    
+    // Extract fields that should be updated in the users table
+    const { full_name, email } = profileData;
+    const userFields: Record<string, any> = {};
+    
+    if (full_name !== undefined) {
+      userFields.full_name = full_name;
+    }
+    
+    if (email !== undefined) {
+      userFields.email = email;
+    }
+    
+    // If we have user fields to update, do that first
+    if (Object.keys(userFields).length > 0) {
+      console.log('Updating user data in users table:', userFields);
+      try {
+        const { error: userUpdateError } = await supabase
+          .from('users')
+          .update(userFields)
+          .eq('id', userId);
+        
+        if (userUpdateError) {
+          console.error('Error updating user data:', userUpdateError);
+        } else {
+          console.log('User data updated successfully');
+        }
+      } catch (userError) {
+        console.error('Exception updating user data:', userError);
+      }
+    }
+    
+    // Remove fields that don't belong in the profile table
+    const { email: _, ...cleanProfileData } = profileData;
+    
+    // Check if the profile exists
+    const { data: existingProfile, error: checkError } = await supabase
       .from('profiles')
-      .update(profileData)
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking for existing profile:', checkError.message);
+      return { 
+        success: false, 
+        error: checkError.message 
+      };
+    }
+    
+    // If no profile exists, create one
+    if (!existingProfile) {
+      console.log('No profile exists, creating new profile');
+      const newProfile = {
+        user_id: userId,
+        ...cleanProfileData
+      };
+      
+      const { data: insertedProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert([newProfile])
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('Error creating profile:', insertError.message);
+        return { 
+          success: false, 
+          error: insertError.message 
+        };
+      }
+      
+      return { 
+        success: true, 
+        profile: insertedProfile 
+      };
+    }
+    
+    // Update existing profile
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from('profiles')
+      .update(cleanProfileData)
       .eq('user_id', userId)
       .select()
       .single();
     
-    if (error) {
-      console.error('Error updating profile:', error.message);
+    if (updateError) {
+      console.error('Error updating profile:', updateError.message);
       return { 
         success: false, 
-        error: error.message 
+        error: updateError.message 
       };
     }
     
     return { 
       success: true, 
-      profile: data 
+      profile: updatedProfile 
     };
   } catch (error: any) {
-    console.error('Unexpected error updating profile:', error);
+    console.error('Exception updating profile in updateProfile:', error);
     return { 
       success: false, 
       error: error.message || 'An unexpected error occurred' 
@@ -504,77 +1078,56 @@ export const updateProfile = async (userId: string, profileData: Partial<Profile
 };
 
 /**
- * Upload a profile avatar image to storage
+ * Upload an avatar image for a user
  */
 export const uploadAvatar = async (userId: string, file: File) => {
   try {
-    // First, check if a 'avatars' bucket exists, if not, create it
-    const { data: bucketData, error: bucketError } = await supabase
-      .storage
-      .getBucket('avatars');
-    
-    if (bucketError && bucketError.message.includes('does not exist')) {
-      // Create the bucket if it doesn't exist
-      await supabase.storage.createBucket('avatars', {
-        public: true,
-        fileSizeLimit: 1024 * 1024 * 2 // 2MB
-      });
+    if (!userId) {
+      return { success: false, error: 'User ID is required' };
     }
-    
-    // Upload the file to storage
+
+    // Create a unique file path for the avatar
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-    const filePath = `${fileName}`;
-    
-    const { error: uploadError } = await supabase
-      .storage
-      .from('avatars')
+    const fileName = `${userId}/avatar-${Date.now()}.${fileExt}`;
+    const filePath = `${userId}/avatar-${Date.now()}.${fileExt}`;
+
+    // Upload the file to the 'profile_pictures' bucket with the user's ID as the folder name
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('profile_pictures')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true
       });
-    
+
     if (uploadError) {
-      console.error('Error uploading avatar:', uploadError.message);
-      return { 
-        success: false, 
-        error: uploadError.message 
-      };
+      console.error('Error uploading avatar:', uploadError);
+      return { success: false, error: uploadError.message };
     }
-    
+
     // Get the public URL for the uploaded file
-    const { data: urlData } = supabase
-      .storage
-      .from('avatars')
+    const { data: publicURLData } = supabase.storage
+      .from('profile_pictures')
       .getPublicUrl(filePath);
-    
+
+    const avatarUrl = publicURLData.publicUrl;
+
     // Update the user's profile with the new avatar URL
-    const { data, error } = await supabase
+    const { data: profile, error: updateError } = await supabase
       .from('profiles')
-      .update({ avatar_url: urlData.publicUrl })
+      .update({ avatar_url: avatarUrl })
       .eq('user_id', userId)
-      .select()
+      .select('*')
       .single();
-    
-    if (error) {
-      console.error('Error updating profile with avatar URL:', error.message);
-      return { 
-        success: false, 
-        error: error.message 
-      };
+
+    if (updateError) {
+      console.error('Error updating profile with avatar URL:', updateError);
+      return { success: false, error: updateError.message };
     }
-    
-    return { 
-      success: true, 
-      profile: data,
-      url: urlData.publicUrl
-    };
+
+    return { success: true, profile, url: avatarUrl };
   } catch (error: any) {
     console.error('Unexpected error uploading avatar:', error);
-    return { 
-      success: false, 
-      error: error.message || 'An unexpected error occurred' 
-    };
+    return { success: false, error: error.message || 'An unexpected error occurred' };
   }
 };
 
@@ -789,10 +1342,10 @@ export const respondToConnectionRequest = async (connectionId: string, response:
       .single();
     
     if (error) {
-      console.error(`Error ${response === 'accepted' ? 'accepting' : 'rejecting'} connection request:`, error.message);
+      console.error(`Unexpected error ${response === 'accepted' ? 'accepting' : 'rejecting'} connection request:`, error);
       return { 
         success: false, 
-        error: error.message 
+        error: error.message || 'An unexpected error occurred' 
       };
     }
     
@@ -807,4 +1360,4 @@ export const respondToConnectionRequest = async (connectionId: string, response:
       error: error.message || 'An unexpected error occurred' 
     };
   }
-}; 
+};
