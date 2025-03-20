@@ -1,0 +1,26 @@
+@font-face {
+  font-family: 'Naava';
+  src: url('/TextFonts.net_naava-font/Naava.ttf') format('truetype'),
+       url('/TextFonts.net_naava-font/Naava.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Naava';
+  src: url('/TextFonts.net_naava-font/Naava Medium.ttf') format('truetype'),
+       url('/TextFonts.net_naava-font/Naava Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Naava';
+  src: url('/TextFonts.net_naava-font/Naava Bold.ttf') format('truetype'),
+       url('/TextFonts.net_naava-font/Naava Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+} 

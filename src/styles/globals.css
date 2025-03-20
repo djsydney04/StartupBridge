@@ -2,16 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import './fonts.css';
 
 /* Base styles */
 @layer base {
   html {
     @apply antialiased;
+    font-family: 'Naava', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   }
   
   body {
     @apply bg-gray-50 text-gray-900 overflow-x-hidden;
+    font-family: 'Naava', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
 
