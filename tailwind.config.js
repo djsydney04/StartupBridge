@@ -12,10 +12,6 @@ module.exports = {
         secondary: '#333333',
         accent: '#666666',
       },
-      fontFamily: {
-        sans: ['Naava', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        naava: ['Naava', 'sans-serif'],
-      },
     },
   },
   plugins: [],
