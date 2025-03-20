@@ -14,7 +14,10 @@ import {
   CheckIcon,
   XMarkIcon,
   FunnelIcon,
-  BuildingOfficeIcon
+  BuildingOfficeIcon,
+  BriefcaseIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Combobox, Transition } from '@headlessui/react';
@@ -129,6 +132,13 @@ interface Job {
   companySize: string;
   companyStage: string;
   timeCommitment: string;
+  isNew: boolean;
+}
+
+interface FilterGroup {
+  id: string;
+  name: string;
+  options: string[];
 }
 
 const filters = {
@@ -216,63 +226,21 @@ const filters = {
 };
 
 // Updated filter groups with standardized skills
-const filterGroups = [
+const filterGroups: FilterGroup[] = [
   {
-    name: 'Technical Skills',
-    key: 'technicalSkills',
-    subgroups: Object.entries(skillCategoriesData.technicalSkills.skills).map(([key, skills]) => ({
-      name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      skills: skills
-    }))
+    id: 'timeCommitment',
+    name: 'Time Commitment',
+    options: ['Full-time', 'Part-time', 'Contract', 'Internship']
   },
   {
-    name: 'Business & Strategy',
-    key: 'businessSkills',
-    subgroups: Object.entries(skillCategoriesData.businessSkills.skills).map(([key, skills]) => ({
-      name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      skills: skills
-    }))
-  },
-  {
-    name: 'Marketing & Growth',
-    key: 'marketingSkills',
-    subgroups: Object.entries(skillCategoriesData.marketingSkills.skills).map(([key, skills]) => ({
-      name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      skills: skills
-    }))
-  },
-  {
-    name: 'Product & Design',
-    key: 'productSkills',
-    subgroups: Object.entries(skillCategoriesData.productSkills.skills).map(([key, skills]) => ({
-      name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      skills: skills
-    }))
-  },
-  {
-    name: 'Industry',
-    key: 'industry',
-    options: filters.industry
-  },
-  {
-    name: 'Commitment',
-    key: 'commitment',
-    options: filters.commitment
-  },
-  {
+    id: 'companyStage',
     name: 'Company Stage',
-    key: 'companyStage',
-    options: filters.companyStage
+    options: ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+']
   },
   {
-    name: 'Hours per Week',
-    key: 'hoursPerWeek',
-    options: filters.hoursPerWeek
-  },
-  {
-    name: 'Compensation',
-    key: 'compensation',
-    options: filters.compensation
+    id: 'skills',
+    name: 'Skills',
+    options: ['Marketing', 'Design', 'Engineering', 'Product', 'Sales', 'Operations']
   }
 ];
 
@@ -325,38 +293,64 @@ const matchSkill = (query: string, skills: string[]): string[] => {
     });
 };
 
-// Helper function to get page numbers
-const getPageNumbers = (totalPages: number, currentPage: number) => {
-  const pageNumbers: number[] = [];
-  const maxVisiblePages = 5;
+// Format date to "Mar 15" format
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  });
+};
 
-  if (totalPages <= maxVisiblePages) {
+// Generate page numbers for pagination
+const getPageNumbers = (currentPage: number, totalPages: number) => {
+  const pages: (number | string)[] = [];
+  
+  if (totalPages <= 7) {
+    // Less than 7 pages, show all
     for (let i = 1; i <= totalPages; i++) {
-      pageNumbers.push(i);
+      pages.push(i);
     }
   } else {
-    if (currentPage <= 3) {
-      for (let i = 1; i <= maxVisiblePages; i++) {
-        pageNumbers.push(i);
-      }
-    } else if (currentPage >= totalPages - 2) {
-      for (let i = totalPages - maxVisiblePages + 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-        pageNumbers.push(i);
-      }
+    // Always show first page
+    pages.push(1);
+    
+    // Show dots if not right after first page
+    if (currentPage > 3) {
+      pages.push("...");
     }
+    
+    // Show current page and neighbors
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    // Show dots if not right before last page
+    if (currentPage < totalPages - 2) {
+      pages.push("...");
+    }
+    
+    // Always show last page
+    pages.push(totalPages);
   }
-
-  return pageNumbers;
+  
+  return pages;
 };
+
+// Pagination settings
+const itemsPerPage = 10;
 
 export default function JobsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({
+    timeCommitment: [],
+    companyStage: [],
+    skills: []
+  });
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
   const [selectedSkills, setSelectedSkills] = useState<Set<string>>(new Set());
@@ -383,26 +377,69 @@ export default function JobsPage() {
     setSelectedSkills(newSelectedSkills);
   };
 
-  // Filter jobs based on selected skills and search query
+  // Toggle a filter selection
+  const toggleFilter = (groupId: string, option: string) => {
+    setSelectedFilters(prev => {
+      const currentValues = prev[groupId] || [];
+      return {
+        ...prev,
+        [groupId]: currentValues.includes(option)
+          ? currentValues.filter(item => item !== option)
+          : [...currentValues, option]
+      };
+    });
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSelectedFilters({
+      timeCommitment: [],
+      companyStage: [],
+      skills: []
+    });
+  };
+
+  // Filter jobs based on search and filter selections
   const filteredJobs = useMemo(() => {
     return mockJobs.filter(job => {
-      // Filter by search query
-      const searchMatch = searchQuery === '' || 
-        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.company.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Filter by selected skills - job must match ALL selected skills
-      const skillsMatch = selectedSkills.size === 0 ||
-        Array.from(selectedSkills).every(selectedSkill => 
-          job.skills.includes(selectedSkill)
-        );
-
-      return searchMatch && skillsMatch;
+      // Search filter
+      if (searchQuery && !job.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !job.company.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      // Skills filter
+      if (selectedFilters.skills.length > 0 && 
+          !selectedFilters.skills.some(skill => job.skills.includes(skill))) {
+        return false;
+      }
+      
+      // Time commitment filter
+      if (selectedFilters.timeCommitment.length > 0 && 
+          !selectedFilters.timeCommitment.includes(job.timeCommitment)) {
+        return false;
+      }
+      
+      // Company stage filter
+      if (selectedFilters.companyStage.length > 0 && 
+          !selectedFilters.companyStage.includes(job.companyStage)) {
+        return false;
+      }
+      
+      return true;
+    }).map(job => {
+      // Add isNew flag for jobs posted in the last 7 days
+      const postedDate = new Date(job.postedDate);
+      const now = new Date();
+      const daysDifference = Math.ceil((now.getTime() - postedDate.getTime()) / (1000 * 60 * 60 * 24));
+      return {
+        ...job,
+        isNew: daysDifference <= 7
+      };
     });
-  }, [searchQuery, selectedSkills]);
+  }, [searchQuery, selectedFilters]);
 
-  // Pagination
-  const itemsPerPage = 10;
+  // Calculate pagination values
   const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -410,176 +447,288 @@ export default function JobsPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Jobs</h1>
-              <p className="mt-2 text-sm text-gray-600">
-            Find exciting opportunities at innovative startups
-          </p>
-        </div>
-            <div className="flex space-x-4">
-              <Link
-                href="/jobs/manage"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Manage Jobs
-              </Link>
-              <Link
-                href="/jobs/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Create Job
-              </Link>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Jobs</h1>
+            <p className="text-lg text-gray-600">Find exciting opportunities at innovative startups</p>
           </div>
-          
-          {/* Search and filters section */}
-          <div className="mb-8">
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
-                <div className="relative">
-                        <input
-                    type="text"
-                    placeholder="Search jobs by title or company..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <FunnelIcon className="h-5 w-5 mr-2 text-gray-400" />
-                Filters
-                </button>
-              </div>
+          <div className="flex mt-4 sm:mt-0 space-x-3">
+            <Link
+              href="/jobs/manage"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors"
+            >
+              <span>Manage Jobs</span>
+            </Link>
+            <Link
+              href="/jobs/create"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none transition-colors"
+            >
+              <PlusIcon className="h-4 w-4 mr-1.5" />
+              <span>Create Job</span>
+            </Link>
+          </div>
         </div>
 
-          {/* Job listings */}
-          <div className="space-y-6">
-            {filteredJobs.map((job) => (
-            <div
-              key={job.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
-            >
-              <div className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex justify-between">
-                        <h2 className="text-xl font-semibold text-gray-900">
+        <div className="flex flex-col md:flex-row gap-6 mb-6">
+          <div className="relative flex-grow">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+              placeholder="Search jobs by title or company..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                onClick={() => setSearchQuery("")}
+              >
+                <XMarkIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+              </button>
+            )}
+          </div>
+          <button
+            className={`inline-flex items-center px-4 py-3 border ${
+              isFiltersOpen ? "border-black bg-gray-50" : "border-gray-300"
+            } rounded-lg text-sm font-medium transition-colors`}
+            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+          >
+            <FunnelIcon className={`h-5 w-5 ${isFiltersOpen ? "text-black" : "text-gray-500"} mr-2`} />
+            <span className={isFiltersOpen ? "text-gray-900" : "text-gray-700"}>Filters</span>
+            {Object.values(selectedFilters).some(filters => filters.length > 0) && (
+              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-black text-white">
+                {Object.values(selectedFilters).reduce((acc, filters) => acc + filters.length, 0)}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {isFiltersOpen && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 animate-fadeIn">
+            <div className="mb-4">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Filter by</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {filterGroups.map((group) => (
+                  <div key={group.id} className="space-y-2">
+                    <h4 className="font-medium text-gray-900">{group.name}</h4>
+                    <div className="space-y-1">
+                      {group.options.map((option) => (
+                        <div key={option} className="flex items-center">
+                          <input
+                            id={`${group.id}-${option}`}
+                            name={`${group.id}-${option}`}
+                            type="checkbox"
+                            className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
+                            checked={selectedFilters[group.id]?.includes(option) || false}
+                            onChange={() => toggleFilter(group.id, option)}
+                          />
+                          <label
+                            htmlFor={`${group.id}-${option}`}
+                            className="ml-2 text-sm text-gray-700"
+                          >
+                            {option}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-4 border-t border-gray-200">
+              <button
+                className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                onClick={clearFilters}
+              >
+                Clear all filters
+              </button>
+              <button
+                className="text-sm font-medium text-white bg-black px-4 py-2 rounded-md hover:bg-gray-800"
+                onClick={() => setIsFiltersOpen(false)}
+              >
+                Apply filters
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {filteredJobs.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-lg border border-gray-200">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-100">
+                <BriefcaseIcon className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="mt-4 text-lg font-medium text-gray-900">No jobs found</h3>
+              <p className="mt-2 text-sm text-gray-500 max-w-md mx-auto">
+                No jobs match your current filters. Try adjusting your search or filters to find more opportunities.
+              </p>
+              {(searchQuery || Object.values(selectedFilters).some(filters => filters.length > 0)) && (
+                <button
+                  className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors"
+                  onClick={() => {
+                    setSearchQuery('');
+                    clearFilters();
+                  }}
+                >
+                  Reset all filters
+                </button>
+              )}
+            </div>
+          ) : (
+            currentJobs.map((job) => (
+              <div
+                key={job.id}
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden transition-all duration-150 hover:shadow-md group"
+              >
+                <div className="p-6">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
+                    <div className="flex-grow mb-4 sm:mb-0 sm:mr-8">
+                      <div className="flex items-center mb-1">
+                        <h3 className="text-xl font-semibold text-gray-900 group-hover:text-black">
                           {job.title}
-                        </h2>
-                        <time className="text-sm text-gray-500">
-                          {new Date(job.postedDate).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </time>
+                        </h3>
+                        {job.isNew && (
+                          <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            New
+                          </span>
+                        )}
                       </div>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="text-gray-600 mb-2">
                         {job.company} • {job.location}
                       </p>
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-600">
-                          {expandedJobId === job.id ? job.description : `${job.description.slice(0, 150)}...`}
-                        </p>
-                        <button
-                          onClick={() => setExpandedJobId(expandedJobId === job.id ? null : job.id)}
-                          className="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                        >
-                          {expandedJobId === job.id ? 'Show less' : 'Read more'}
-                        </button>
-                      </div>
+                      
+                      {expandedJobId === job.id ? (
+                        <div className="mt-4 space-y-3">
+                          <p className="text-gray-800 whitespace-pre-line">{job.description}</p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedJobId(null);
+                            }}
+                            className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mt-2"
+                          >
+                            Show less
+                            <ChevronUpIcon className="ml-1 h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-gray-700 line-clamp-2">{job.description}</p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedJobId(job.id);
+                            }}
+                            className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mt-2"
+                          >
+                            Read more
+                            <ChevronDownIcon className="ml-1 h-4 w-4" />
+                          </button>
+                        </>
+                      )}
+                      
                       <div className="mt-4 flex flex-wrap gap-2">
                         {job.skills.slice(0, 5).map((skill) => (
                           <span
                             key={skill}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                           >
                             {skill}
                           </span>
                         ))}
                         {job.skills.length > 5 && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
                             +{job.skills.length - 5} more
                           </span>
                         )}
                       </div>
                     </div>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between">
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span className="inline-flex items-center">
-                        <ClockIcon className="h-4 w-4 mr-1.5 text-gray-400" />
-                        {job.timeCommitment} • {job.hoursPerWeek}
-                      </span>
-                      <span className="inline-flex items-center">
-                        <BuildingOfficeIcon className="h-4 w-4 mr-1.5 text-gray-400" />
-                        {job.companyStage}
-                      </span>
+                    
+                    <div className="flex flex-col items-end space-y-4 mt-4 sm:mt-0">
+                      <div className="text-sm text-gray-500 font-medium">
+                        {formatDate(job.postedDate)}
+                      </div>
+                      <div className="flex flex-col items-end space-y-2 mt-2">
+                        <div className="inline-flex items-center text-sm font-medium text-gray-700">
+                          <ClockIcon className="h-4 w-4 text-gray-400 mr-1.5" />
+                          <span>{job.timeCommitment} • {job.hoursPerWeek}</span>
+                        </div>
+                        <div className="inline-flex items-center text-sm font-medium text-gray-700">
+                          <BuildingOfficeIcon className="h-4 w-4 text-gray-400 mr-1.5" />
+                          <span>{job.companyStage}</span>
+                        </div>
+                      </div>
+                      <Link
+                        href={`/jobs/${job.id}/apply`}
+                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none transition-colors"
+                      >
+                        Apply Now
+                      </Link>
                     </div>
-                    <Link
-                      href={job.applicationFormUrl}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Apply Now
-                      <ArrowTopRightOnSquareIcon className="ml-2 h-4 w-4" />
-                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
         
-          {/* Pagination */}
-          <div className="flex items-center justify-center space-x-2 mt-8 pb-8">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === 1
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Previous
-            </button>
-
-            {getPageNumbers(totalPages, currentPage).map((pageNum) => (
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-center">
+            <nav className="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
               <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                className={`px-3 py-1 rounded-md ${
-                  currentPage === pageNum
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                className={`relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                  currentPage === 1
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-700 hover:bg-gray-50"
                 }`}
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
               >
-                {pageNum}
+                <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Previous</span>
               </button>
-            ))}
-
-          <button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === totalPages
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Next
-          </button>
+              
+              {getPageNumbers(currentPage, totalPages).map((pageNumber, index) => (
+                <React.Fragment key={index}>
+                  {pageNumber === "..." ? (
+                    <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                        currentPage === pageNumber
+                          ? "z-10 bg-black border-black text-white"
+                          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      }`}
+                      onClick={() => setCurrentPage(pageNumber as number)}
+                    >
+                      {pageNumber}
+                    </button>
+                  )}
+                </React.Fragment>
+              ))}
+              
+              <button
+                className={`relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                  currentPage === totalPages
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <span className="sr-only">Next</span>
+                <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </nav>
           </div>
-        </div>
+        )}
       </div>
     </DashboardLayout>
   );
