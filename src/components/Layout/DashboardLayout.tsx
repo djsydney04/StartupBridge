@@ -81,11 +81,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
             <Link href="/dashboard" className="hover:opacity-90 transition-opacity ml-2">
               <Image 
-                src="/images/Logo.svg" 
+                src="/images/SB_(Left Alligned).svg" 
                 alt="Logo" 
-                width={120} 
-                height={30}
+                width={76} 
+                height={20}
                 priority
+                className="ml-4"
               />
             </Link>
           </div>
@@ -98,14 +99,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         aria-label="Sidebar"
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-center border-b border-gray-200 p-2">
+        <div className="h-16 flex items-center border-b border-gray-200">
           <Link href="/dashboard" className="hover:opacity-90 transition-opacity">
             <Image 
-              src="/images/Logo.svg" 
+              src="/images/SB_(Left Alligned).svg" 
               alt="Logo" 
-              width={180} 
-              height={40}
+              width={114} 
+              height={26}
               priority
+              className="ml-4"
             />
           </Link>
         </div>
@@ -124,8 +126,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     group flex items-center px-4 py-3 text-sm font-medium rounded-md
                     transition-colors duration-150 ease-in-out mb-1
                     ${isActive 
-                      ? 'bg-gray-100 text-black' 
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-gray-100 text-[#545454]' 
+                      : 'text-[#545454] hover:bg-gray-50 hover:text-[#545454]'
                     }
                   `}
                   aria-current={isActive ? 'page' : undefined}
@@ -134,7 +136,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <item.icon
                     className={`
                       mr-3 h-5 w-5 flex-shrink-0
-                      ${isActive ? 'text-black' : 'text-gray-400 group-hover:text-gray-500'}
+                      ${isActive ? 'text-[#545454]' : 'text-gray-400 group-hover:text-[#545454]'}
                     `}
                     aria-hidden="true"
                   />
@@ -152,8 +154,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 group flex items-center px-4 py-3 text-sm font-medium rounded-md
                 transition-colors duration-150 ease-in-out mb-1
                 ${router.pathname.startsWith('/profile') 
-                  ? 'bg-gray-100 text-black' 
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-gray-100 text-[#545454]' 
+                  : 'text-[#545454] hover:bg-gray-50 hover:text-[#545454]'
                 }
               `}
               aria-current={router.pathname.startsWith('/profile') ? 'page' : undefined}
@@ -162,7 +164,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <UserCircleIcon
                 className={`
                   mr-3 h-5 w-5 flex-shrink-0
-                  ${router.pathname.startsWith('/profile') ? 'text-black' : 'text-gray-400 group-hover:text-gray-500'}
+                  ${router.pathname.startsWith('/profile') ? 'text-[#545454]' : 'text-gray-400 group-hover:text-[#545454]'}
                 `}
                 aria-hidden="true"
               />
@@ -174,10 +176,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               onClick={handleSignOut}
               className="w-full group flex items-center px-4 py-3 text-sm font-medium rounded-md
                 transition-colors duration-150 ease-in-out
-                text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                text-[#545454] hover:bg-gray-50 hover:text-[#545454]"
             >
               <ArrowRightOnRectangleIcon
-                className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
+                className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-[#545454]"
                 aria-hidden="true"
               />
               <span>Sign Out</span>
